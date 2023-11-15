@@ -16,7 +16,11 @@ def main(args):
 
         truth = pred[:, 0]
         out = pred[:, 1:]
-        pred_label = np.argmax(out, axis=1)
+        
+        if args.objective != "regression":
+          pred_label = np.argmax(out, axis=1)
+        else:
+          pred_label = out
 
         scorer.eval(truth, pred_label, out)
 
