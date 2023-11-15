@@ -18,6 +18,28 @@ def load_data(args):
 
     if args.dataset == "CaliforniaHousing":  # Regression dataset
         X, y = sklearn.datasets.fetch_california_housing(return_X_y=True)
+    
+    elif args.dataset == "Dialysis":  # Regression dataset
+      # Define the file path
+      csv_file_path = 'data/dialysis.csv'
+
+      # Read the CSV file into a pandas DataFrame without headers
+      dialysis_data = pd.read_csv(csv_file_path, header=None)
+
+      # Extract features (X) and target variable (y)
+      X = dialysis_data.iloc[:, :-1].values  # Select all columns except the last one and convert to NumPy array
+      y = dialysis_data.iloc[:, -1].values   # Select the last column and convert to NumPy array
+
+
+      # Skip the first row as it might contain string headers
+      if y[0] == 'BUN':
+        X = X[1:, :]
+        y = y[1:]
+
+      # Convert the data to the appropriate data types
+      X = X.astype(np.float64)
+      y = y.astype(np.float64)
+      
 
     elif args.dataset == "Covertype":  # Multi-class classification dataset
         X, y = sklearn.datasets.fetch_covtype(return_X_y=True)
