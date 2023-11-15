@@ -5,7 +5,7 @@ model_name: DeepGBM # LinearModel, KNN, SVM, DecisionTree, RandomForest, MLP
                            # TabNet, VIME, TabTransformer, ModelTree, NODE, DeepGBM, RLN, DNFNet,
                            # STG, NAM, DeepFM, SAINT
 objective: regression
-optimize_hyperparameters: True
+#optimize_hyperparameters: True
 
 # GPU parameters
 use_gpu: False
