@@ -23,9 +23,9 @@ parameters: {
             eta: 0.021837027762887255
         },
         CatBoost: {
-            learning_rate: 0.129,
-            max_depth: 12,
-            l2_leaf_reg: 17.7
+            learning_rate: 0.1689415887600105,
+            max_depth: 3,
+            l2_leaf_reg: 1.148328317443914
         },
         LightGBM: {
             num_leaves: 1544,
