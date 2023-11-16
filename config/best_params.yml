@@ -1,5 +1,120 @@
 
 parameters: {
+     Dialysis: {
+        LinearModel: { },
+        KNN: {
+            n_neighbors: 7
+        },
+
+        SVM: {
+          C: 3896.8169314397924
+        },
+        DecisionTree: {
+            max_depth: 7
+        },
+        RandomForest: {
+            max_depth: 10,
+            n_estimators: 44
+        },
+        XGBoost: {
+            max_depth: 3,
+            lambda: 3.080746854686366e-06,
+            alpha: 4.246340004493178e-06,
+            eta: 0.01873916722152924
+        },
+        CatBoost: {
+            learning_rate: 0.129,
+            max_depth: 12,
+            l2_leaf_reg: 17.7
+        },
+        LightGBM: {
+            num_leaves: 422,
+            lambda_l2: 1.2551384857408119e-07,
+            lambda_l1: 1.574746676358734e-08,
+            learning_rate: 0.10136484168212087
+        },
+        ModelTree: {
+            criterion: gradient,
+            max_depth: 1
+        },
+        MLP: {
+            hidden_dim: 68,
+            n_layers: 3,
+            learning_rate: 9.0e-4
+        },
+        TabNet: {
+            n_d: 43,
+            n_steps: 4,
+            gamma: 1.22,
+            cat_emb_dim: 1,
+            n_independent: 5,
+            n_shared: 4,
+            momentum: 0.235,
+            mask_type: entmax
+        },
+        VIME: {
+            p_m: 0.825,
+            K: 5,
+            alpha: 9.26,
+            beta: 0.104
+        },
+        TabTransformer: {
+            dim: 256,
+            depth: 6,
+            heads: 4,
+            weight_decay: -2,
+            learning_rate: -3,
+            dropout: 0.3
+        },
+        NODE: {
+            num_layers: 2,
+            total_tree_count: 2048,
+            tree_depth: 6,
+            tree_output_dim: 3
+        },
+        DeepGBM: {
+            n_trees: 100,
+            maxleaf: 128,
+            loss_de: 5,
+            loss_dr: 0.9
+        },
+        RLN: {
+            layers: 4,
+            theta: -12,
+            log_lr: 5,
+            norm: 2
+        },
+        DNFNet: {
+            n_forumlas: 1024,
+            elastic_net_beta: 1.3
+        },
+        STG: {
+            learning_rate: 1.48e-3,
+            lam: 1.87e-3,
+            hidden_dims: [ 500, 400, 20 ]
+        },
+        NAM: {
+            lr: 1.14e-3,
+            output_regularization: 9.1e-3,
+            dropout: 4.22e-3,
+            feature_dropout: 0.154,
+        },
+        DeepFM: {
+            dnn_dropout: 0.484
+        },
+        SAINT: {
+            dim: 256,
+            depth: 1,
+            heads: 2,
+            dropout: 0.6
+        },
+        DANet: {
+            layer: 10,
+            base_outdim: 96,
+            k: 3,
+            drop_rate: 0
+        },
+    },
     Adult: {
         LinearModel: {},
         KNN: {
@@ -143,121 +258,6 @@ parameters: {
         ModelTree: {
             criterion: gradient-renorm-z,
             max_depth: 3
-        },
-        MLP: {
-            hidden_dim: 68,
-            n_layers: 3,
-            learning_rate: 9.0e-4
-        },
-        TabNet: {
-            n_d: 43,
-            n_steps: 4,
-            gamma: 1.22,
-            cat_emb_dim: 1,
-            n_independent: 5,
-            n_shared: 4,
-            momentum: 0.235,
-            mask_type: entmax
-        },
-        VIME: {
-            p_m: 0.825,
-            K: 5,
-            alpha: 9.26,
-            beta: 0.104
-        },
-        TabTransformer: {
-            dim: 256,
-            depth: 6,
-            heads: 4,
-            weight_decay: -2,
-            learning_rate: -3,
-            dropout: 0.3
-        },
-        NODE: {
-            num_layers: 2,
-            total_tree_count: 2048,
-            tree_depth: 6,
-            tree_output_dim: 3
-        },
-        DeepGBM: {
-            n_trees: 100,
-            maxleaf: 128,
-            loss_de: 5,
-            loss_dr: 0.9
-        },
-        RLN: {
-            layers: 4,
-            theta: -12,
-            log_lr: 5,
-            norm: 2
-        },
-        DNFNet: {
-            n_forumlas: 1024,
-            elastic_net_beta: 1.3
-        },
-        STG: {
-            learning_rate: 1.48e-3,
-            lam: 1.87e-3,
-            hidden_dims: [ 500, 400, 20 ]
-        },
-        NAM: {
-            lr: 1.14e-3,
-            output_regularization: 9.1e-3,
-            dropout: 4.22e-3,
-            feature_dropout: 0.154,
-        },
-        DeepFM: {
-            dnn_dropout: 0.484
-        },
-        SAINT: {
-            dim: 256,
-            depth: 1,
-            heads: 2,
-            dropout: 0.6
-        },
-        DANet: {
-            layer: 10,
-            base_outdim: 96,
-            k: 3,
-            drop_rate: 0
-        },
-    },
-     Dialysis: {
-        LinearModel: { },
-        KNN: {
-            n_neighbors: 5
-        },
-
-        SVM: {
-          C: 19.09116742691878
-        },
-        DecisionTree: {
-            max_depth: 7
-        },
-        RandomForest: {
-            max_depth: 10,
-            n_estimators: 44
-        },
-        XGBoost: {
-            max_depth: 3,
-            lambda: 3.080746854686366e-06,
-            alpha: 4.246340004493178e-06,
-            eta: 0.01873916722152924
-        },
-        CatBoost: {
-            learning_rate: 0.129,
-            max_depth: 12,
-            l2_leaf_reg: 17.7
-        },
-        LightGBM: {
-            num_leaves: 422,
-            lambda_l2: 1.2551384857408119e-07,
-            lambda_l1: 1.574746676358734e-08,
-            learning_rate: 0.10136484168212087
-        },
-        ModelTree: {
-            criterion: gradient,
-            max_depth: 1
         },
         MLP: {
             hidden_dim: 68,
