@@ -10,7 +10,7 @@ from utils.timer import Timer
 from utils.io_utils import save_results_to_file, save_hyperparameters_to_file, save_loss_to_file
 from utils.parser import get_parser, get_given_parameters_parser
 
-from sklearn.model_selection import KFold, StratifiedKFold  # , train_test_split
+from sklearn.model_selection import KFold, StratifiedKFold, train_test_split
 
 
 def cross_validation(model, X, y, args, save_model=False):
@@ -31,14 +31,14 @@ def cross_validation(model, X, y, args, save_model=False):
         X_train, X_test = X[train_index], X[test_index]
         y_train, y_test = y[train_index], y[test_index]
 
-        # X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.05, random_state=args.seed)
+        X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.05, random_state=args.seed)
 
         # Create a new unfitted version of the model
         curr_model = model.clone()
 
         # Train model
         train_timer.start()
-        loss_history, val_loss_history = curr_model.fit(X_train, y_train, X_test, y_test)  # X_val, y_val)
+        loss_history, val_loss_history = curr_model.fit(X_train, y_train, X_val, y_val)
         train_timer.end()
 
         # Test model
@@ -56,13 +56,13 @@ def cross_validation(model, X, y, args, save_model=False):
         # Compute scores on the output
         sc.eval(y_test, curr_model.predictions, curr_model.prediction_probabilities)
 
-        print(sc.get_results())
+        print(f'Result of {i} fold',sc.get_results())
 
     # Best run is saved to file
     if save_model:
         print("Results:", sc.get_results())
-        print("Train time:", train_timer.get_average_time())
-        print("Inference time:", test_timer.get_average_time())
+        print("Train time (s):", round(train_timer.get_average_time(),4))
+        print("Inference time (s):", round(test_timer.get_average_time(),4))
 
         # Save the all statistics to a file
         save_results_to_file(args, sc.get_results(),
@@ -70,7 +70,7 @@ def cross_validation(model, X, y, args, save_model=False):
                              model.params)
 
     # print("Finished cross validation")
-    return sc, (train_timer.get_average_time(), test_timer.get_average_time())
+    return sc, (round(train_timer.get_average_time(),4), round(test_timer.get_average_time(),4))
 
 
 class Objective(object):
@@ -131,8 +131,8 @@ def main_once(args):
     model = model_name(parameters, args)
 
     sc, time = cross_validation(model, X, y, args)
-    print(sc.get_results())
-    print(time)
+    print(f'Final Result of {args.num_splits}-Fold CV',sc.get_results())
+    print('Training and Inference Time (s): ',time)
 
 
 if __name__ == "__main__":

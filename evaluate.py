@@ -25,8 +25,11 @@ def main(args):
         scorer.eval(truth, pred_label, out)
 
     result = scorer.get_results()
-    print(result)
+    # Unpack values from the result dictionary
+    mse_mean, mse_std, r2_mean, r2_std = result["MSE - mean"], result["MSE - std"], result["R2 - mean"], result["R2 - std"]
 
+    # Print the values
+    print(f"Final Result of {args.num_splits}-Fold CV: MSE: {round(mse_mean,4)}±{round(mse_std,4)}, R2: {round(r2_mean,4)}±{round(r2_std,4)}")
     save_results_to_file(args, result)
 
 

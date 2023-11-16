@@ -131,7 +131,7 @@ def load_data(args):
         raise AttributeError("Dataset \"" + args.dataset + "\" not available")
 
     print("Dataset loaded!")
-    print(X.shape)
+    print('Data Shape: ',X.shape)
 
     # Preprocess target
     if args.target_encode:
