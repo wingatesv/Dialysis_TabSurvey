@@ -94,6 +94,7 @@ class CatBoost(BaseModel):
             self.params["devices"] = [self.args.gpu_ids]
 
         self.params["cat_features"] = self.args.cat_idx
+        self.params["allow_writing_files"] = False  # Add this line to prevent making directory error
 
         if args.objective == "regression":
             self.model = cat.CatBoostRegressor(**self.params)
