@@ -13,14 +13,14 @@ parameters: {
             max_depth: 7
         },
         RandomForest: {
-            max_depth: 10,
-            n_estimators: 44
+            max_depth: 6,
+            n_estimators: 54
         },
         XGBoost: {
-            max_depth: 3,
-            lambda: 3.080746854686366e-06,
-            alpha: 4.246340004493178e-06,
-            eta: 0.01873916722152924
+            max_depth: 2,
+            lambda: 5.257809495038987e-08,
+            alpha: 0.011032092499213256,
+            eta: 0.021837027762887255
         },
         CatBoost: {
             learning_rate: 0.129,
@@ -28,10 +28,10 @@ parameters: {
             l2_leaf_reg: 17.7
         },
         LightGBM: {
-            num_leaves: 422,
-            lambda_l2: 1.2551384857408119e-07,
-            lambda_l1: 1.574746676358734e-08,
-            learning_rate: 0.10136484168212087
+            num_leaves: 1544,
+            lambda_l2: 0.00010520547553234097,
+            lambda_l1: 2.432480754230456e-06,
+            learning_rate: 0.11248154485849056
         },
         ModelTree: {
             criterion: gradient,
