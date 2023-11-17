@@ -1,6 +1,6 @@
 import logging
 import sys
-
+import numpy as np
 import optuna
 
 from models import str2model
@@ -32,6 +32,23 @@ def cross_validation(model, X, y, args, save_model=False):
         y_train, y_test = y[train_index], y[test_index]
 
         X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.05, random_state=args.seed)
+
+        # Perform data augmentation on regression data
+        if args.regression_aug:
+          print('Adding Gaussion Noise to the training data')
+          # Define the noise level
+          noise_level = 0.01
+
+          # Perform data augmentation by adding Gaussian noise to the features (X)
+          noise = np.random.normal(loc=0, scale=noise_level, size=X_train.shape)
+          X_train_augmented = X_train + noise
+
+          # Combine the original features with the augmented features
+          X_train = np.vstack([X_train, X_train_augmented])
+
+          # Generate new target values for the augmented samples
+          y_train_augmented = y_train + np.random.normal(loc=0, scale=noise_level, size=y_train.shape)
+          y_train = np.hstack([y_train, y_train_augmented])
 
         # Create a new unfitted version of the model
         curr_model = model.clone()
