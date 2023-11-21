@@ -12,8 +12,22 @@ from utils.parser import get_parser, get_given_parameters_parser
 
 from sklearn.model_selection import KFold, StratifiedKFold, train_test_split
 
+def augment_data(X_train, y_train, gaussian_noise_level):
+    print('Gaussian Noise Level: ', gaussian_noise_level)
+    # Perform data augmentation by adding Gaussian noise to the features (X)
+    noise = np.random.normal(loc=0, scale=gaussian_noise_level, size=X_train.shape)
+    X_train_augmented = X_train + noise
 
-def cross_validation(model, X, y, args, save_model=False):
+    # Combine the original features with the augmented features
+    X_train = np.vstack([X_train, X_train_augmented])
+
+    # Generate new target values for the augmented samples
+    y_train_augmented = y_train + np.random.normal(loc=0, scale=gaussian_noise_level, size=y_train.shape)
+    y_train = np.hstack([y_train, y_train_augmented])
+
+    return X_train, y_train
+
+def cross_validation(model, X, y, args, gaussian_noise_level, save_model=False):
     # Record some statistics and metrics
     sc = get_scorer(args)
     train_timer = Timer()
@@ -35,20 +49,7 @@ def cross_validation(model, X, y, args, save_model=False):
 
         # Perform data augmentation on regression data
         if args.regression_aug:
-          print('Adding Gaussion Noise to the training data')
-          # Define the noise level
-          noise_level = 0.01
-
-          # Perform data augmentation by adding Gaussian noise to the features (X)
-          noise = np.random.normal(loc=0, scale=noise_level, size=X_train.shape)
-          X_train_augmented = X_train + noise
-
-          # Combine the original features with the augmented features
-          X_train = np.vstack([X_train, X_train_augmented])
-
-          # Generate new target values for the augmented samples
-          y_train_augmented = y_train + np.random.normal(loc=0, scale=noise_level, size=y_train.shape)
-          y_train = np.hstack([y_train, y_train_augmented])
+          X_train, y_train = augment_data(X_train, y_train, gaussian_noise_level)
 
         # Create a new unfitted version of the model
         curr_model = model.clone()
@@ -105,11 +106,15 @@ class Objective(object):
         # Define hyperparameters to optimize
         trial_params = self.model_name.define_trial_parameters(trial, self.args)
 
+        # Add the Gaussian noise level as a hyperparameter
+        gaussian_noise_level = trial.suggest_float("gaussian_noise_level", 0.01, 0.5)
+        trial_params['gaussian_noise_level'] = gaussian_noise_level
+
         # Create model
         model = self.model_name(trial_params, self.args)
 
         # Cross validate the chosen hyperparameters
-        sc, time = cross_validation(model, self.X, self.y, self.args)
+        sc, time = cross_validation(model, self.X, self.y, self.args, gaussian_noise_level)
 
         save_hyperparameters_to_file(self.args, trial_params, sc.get_results(), time)
 
@@ -135,7 +140,8 @@ def main(args):
 
     # Run best trial again and save it!
     model = model_name(study.best_trial.params, args)
-    cross_validation(model, X, y, args, save_model=True)
+    best_gaussian_noise_level = study.best_trial.params['gaussian_noise_level']
+    cross_validation(model, X, y, args, best_gaussian_noise_level, save_model=True)
 
 
 def main_once(args):
