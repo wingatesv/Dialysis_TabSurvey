@@ -12,22 +12,28 @@ from utils.parser import get_parser, get_given_parameters_parser
 
 from sklearn.model_selection import KFold, StratifiedKFold, train_test_split
 
-def augment_data(X_train, y_train, gaussian_noise_level):
-    print('Gaussian Noise Level: ', gaussian_noise_level)
+
+def augment_data(X_train, y_train, augmentation_params):
+    print('Gaussian Noise Level: ', augmentation_params['gaussian_noise_level'], ' Jitter Level: ', augmentation_params['jitter_level'])
+
     # Perform data augmentation by adding Gaussian noise to the features (X)
-    noise = np.random.normal(loc=0, scale=gaussian_noise_level, size=X_train.shape)
-    X_train_augmented = X_train + noise
+    noise = np.random.normal(loc=0, scale=augmentation_params['gaussian_noise_level'], size=X_train.shape)
+    X_train_augmented_noise = X_train + noise
+
+    # Perform data augmentation by adding random jittering to the features (X)
+    jitter = np.random.uniform(-augmentation_params['jitter_level'], augmentation_params['jitter_level'], size=X_train.shape)
+    X_train_augmented_jitter = X_train + jitter
 
     # Combine the original features with the augmented features
-    X_train = np.vstack([X_train, X_train_augmented])
+    X_train = np.vstack([X_train, X_train_augmented_noise, X_train_augmented_jitter])
 
     # Generate new target values for the augmented samples
-    y_train_augmented = y_train + np.random.normal(loc=0, scale=gaussian_noise_level, size=y_train.shape)
-    y_train = np.hstack([y_train, y_train_augmented])
+    y_train_augmented = np.hstack([y_train, y_train, y_train])
 
-    return X_train, y_train
+    return X_train, y_train_augmented
 
-def cross_validation(model, X, y, args, gaussian_noise_level, save_model=False):
+
+def cross_validation(model, X, y, args, augmentation_params, save_model=False):
     # Record some statistics and metrics
     sc = get_scorer(args)
     train_timer = Timer()
@@ -49,7 +55,7 @@ def cross_validation(model, X, y, args, gaussian_noise_level, save_model=False):
 
         # Perform data augmentation on regression data
         if args.regression_aug:
-          X_train, y_train = augment_data(X_train, y_train, gaussian_noise_level)
+          X_train, y_train = augment_data(X_train, y_train, augmentation_params)
 
         # Create a new unfitted version of the model
         curr_model = model.clone()
@@ -106,15 +112,21 @@ class Objective(object):
         # Define hyperparameters to optimize
         trial_params = self.model_name.define_trial_parameters(trial, self.args)
 
-        # Add the Gaussian noise level as a hyperparameter
-        gaussian_noise_level = trial.suggest_float("gaussian_noise_level", 0.01, 0.5)
-        trial_params['gaussian_noise_level'] = gaussian_noise_level
+
+        # Initialize augmentation_params
+        augmentation_params = {
+            'gaussian_noise_level': trial.suggest_float("gaussian_noise_level", 0.01, 0.5),
+            'jitter_level': trial.suggest_float("jitter_level", 0.01, 0.5)
+        }
+
+        # Include augmentation_params into trial_params
+        trial_params.update(augmentation_params)
 
         # Create model
         model = self.model_name(trial_params, self.args)
 
         # Cross validate the chosen hyperparameters
-        sc, time = cross_validation(model, self.X, self.y, self.args, gaussian_noise_level)
+        sc, time = cross_validation(model, self.X, self.y, self.args, augmentation_params)
 
         save_hyperparameters_to_file(self.args, trial_params, sc.get_results(), time)
 
@@ -140,8 +152,12 @@ def main(args):
 
     # Run best trial again and save it!
     model = model_name(study.best_trial.params, args)
-    best_gaussian_noise_level = study.best_trial.params['gaussian_noise_level']
-    cross_validation(model, X, y, args, best_gaussian_noise_level, save_model=True)
+
+    best_augmentation_params = {
+        'gaussian_noise_level': study.best_trial.params['gaussian_noise_level'],
+        'jitter_level': study.best_trial.params['jitter_level']
+    }
+    cross_validation(model, X, y, args, best_augmentation_params, save_model=True)
 
 
 def main_once(args):
