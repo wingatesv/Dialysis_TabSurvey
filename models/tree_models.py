@@ -19,7 +19,8 @@ from models.basemodel import BaseModel
 class XGBoost(BaseModel):
 
     def __init__(self, params, args):
-        super().__init__(params, args)
+        model_params = {key: params[key] for key in params if key not in ['gaussian_noise_level', 'jitter_level']}
+        super().__init__(model_params, args)
 
         self.params["verbosity"] = 1
 
@@ -81,7 +82,8 @@ class XGBoost(BaseModel):
 class CatBoost(BaseModel):
 
     def __init__(self, params, args):
-        super().__init__(params, args)
+        model_params = {key: params[key] for key in params if key not in ['gaussian_noise_level', 'jitter_level']}
+        super().__init__(model_params, args)
 
         self.params["iterations"] = self.args.epochs
         self.params["od_type"] = "Iter"
@@ -139,7 +141,8 @@ class CatBoost(BaseModel):
 class LightGBM(BaseModel):
 
     def __init__(self, params, args):
-        super().__init__(params, args)
+        model_params = {key: params[key] for key in params if key not in ['gaussian_noise_level', 'jitter_level']}
+        super().__init__(model_params, args)
 
         self.params["verbosity"] = -1
 

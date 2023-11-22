@@ -12,25 +12,52 @@ from utils.parser import get_parser, get_given_parameters_parser
 
 from sklearn.model_selection import KFold, StratifiedKFold, train_test_split
 
+def augment_data(X_train, y_train, augmentation_params, apply_gaussian_noise = False, apply_random_jitter = True):
+    # Initialize augmented data as original data
+    X_train_augmented = X_train
+    y_train_augmented = y_train
 
-def augment_data(X_train, y_train, augmentation_params):
-    print('Gaussian Noise Level: ', augmentation_params['gaussian_noise_level'], ' Jitter Level: ', augmentation_params['jitter_level'])
+    # Check if Gaussian noise should be applied
+    if apply_gaussian_noise:
+        print('Gaussian Noise Level: ', augmentation_params['gaussian_noise_level'])
+        # Perform data augmentation by adding Gaussian noise to the features (X)
+        noise = np.random.normal(loc=0, scale=augmentation_params['gaussian_noise_level'], size=X_train.shape)
+        X_train_augmented_noise = X_train + noise
+        # Combine the original features with the augmented features
+        X_train_augmented = np.vstack([X_train_augmented, X_train_augmented_noise])
+        y_train_augmented = np.hstack([y_train_augmented, y_train])
 
-    # Perform data augmentation by adding Gaussian noise to the features (X)
-    noise = np.random.normal(loc=0, scale=augmentation_params['gaussian_noise_level'], size=X_train.shape)
-    X_train_augmented_noise = X_train + noise
+    # Check if random jitter should be applied
+    if apply_random_jitter:
+        print('Jitter Level: ', augmentation_params['jitter_level'])
+        # Perform data augmentation by adding random jittering to the features (X)
+        jitter = np.random.uniform(-augmentation_params['jitter_level'], augmentation_params['jitter_level'], size=X_train.shape)
+        X_train_augmented_jitter = X_train + jitter
+        # Combine the original features with the augmented features
+        X_train_augmented = np.vstack([X_train_augmented, X_train_augmented_jitter])
+        y_train_augmented = np.hstack([y_train_augmented, y_train])
 
-    # Perform data augmentation by adding random jittering to the features (X)
-    jitter = np.random.uniform(-augmentation_params['jitter_level'], augmentation_params['jitter_level'], size=X_train.shape)
-    X_train_augmented_jitter = X_train + jitter
+    return X_train_augmented, y_train_augmented
 
-    # Combine the original features with the augmented features
-    X_train = np.vstack([X_train, X_train_augmented_noise, X_train_augmented_jitter])
 
-    # Generate new target values for the augmented samples
-    y_train_augmented = np.hstack([y_train, y_train, y_train])
+# def augment_data(X_train, y_train, augmentation_params):
+#     print('Gaussian Noise Level: ', augmentation_params['gaussian_noise_level'], ' Jitter Level: ', augmentation_params['jitter_level'])
 
-    return X_train, y_train_augmented
+#     # Perform data augmentation by adding Gaussian noise to the features (X)
+#     noise = np.random.normal(loc=0, scale=augmentation_params['gaussian_noise_level'], size=X_train.shape)
+#     X_train_augmented_noise = X_train + noise
+
+#     # Perform data augmentation by adding random jittering to the features (X)
+#     jitter = np.random.uniform(-augmentation_params['jitter_level'], augmentation_params['jitter_level'], size=X_train.shape)
+#     X_train_augmented_jitter = X_train + jitter
+
+#     # Combine the original features with the augmented features
+#     X_train = np.vstack([X_train, X_train_augmented_noise, X_train_augmented_jitter])
+
+#     # Generate new target values for the augmented samples
+#     y_train_augmented = np.hstack([y_train, y_train, y_train])
+
+#     return X_train, y_train_augmented
 
 
 def cross_validation(model, X, y, args, augmentation_params, save_model=False):
