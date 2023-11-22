@@ -37,4 +37,4 @@ num_features: 10
 num_classes: 1 # always one for regression!
 
 # Data Augmentation
-regression_aug: True
+# regression_aug: True

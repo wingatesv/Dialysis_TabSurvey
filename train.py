@@ -141,13 +141,15 @@ class Objective(object):
 
 
         # Initialize augmentation_params
-        augmentation_params = {
-            'gaussian_noise_level': trial.suggest_float("gaussian_noise_level", 0.01, 0.5),
-            'jitter_level': trial.suggest_float("jitter_level", 0.01, 0.5)
-        }
+        augmentation_params = dict()
+        if self.args.regression_aug:
+          augmentation_params = {
+              'gaussian_noise_level': trial.suggest_float("gaussian_noise_level", 0.01, 0.5),
+              'jitter_level': trial.suggest_float("jitter_level", 0.01, 0.5)
+          }
 
-        # Include augmentation_params into trial_params
-        trial_params.update(augmentation_params)
+          # Include augmentation_params into trial_params
+          trial_params.update(augmentation_params)
 
         # Create model
         model = self.model_name(trial_params, self.args)
@@ -180,10 +182,12 @@ def main(args):
     # Run best trial again and save it!
     model = model_name(study.best_trial.params, args)
 
-    best_augmentation_params = {
-        'gaussian_noise_level': study.best_trial.params['gaussian_noise_level'],
-        'jitter_level': study.best_trial.params['jitter_level']
-    }
+    best_augmentation_params = dict()
+    if args.regression_aug:
+      best_augmentation_params = {
+          'gaussian_noise_level': study.best_trial.params['gaussian_noise_level'],
+          'jitter_level': study.best_trial.params['jitter_level']
+      }
     cross_validation(model, X, y, args, best_augmentation_params, save_model=True)
 
 

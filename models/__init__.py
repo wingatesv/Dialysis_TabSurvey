@@ -9,6 +9,18 @@ def str2model(model):
         from models.baseline_models import LinearModel
         return LinearModel
 
+    elif model == "LassoLinearModel":
+        from models.baseline_models import LinearModel
+        return LinearModel
+    
+    elif model == "RidgeLinearModel":
+        from models.baseline_models import LinearModel
+        return LinearModel
+
+    elif model == "BayesianModel":
+        from models.baseline_models import BayesianModel
+        return BayesianModel
+
     elif model == "KNN":
         from models.baseline_models import KNN
         return KNN

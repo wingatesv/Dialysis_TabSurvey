@@ -1,6 +1,8 @@
 import random
 
 from sklearn import linear_model, neighbors, svm, tree, ensemble
+from sklearn.linear_model import BayesianRidge
+from sklearn.naive_bayes import GaussianNB
 
 from models.basemodel import BaseModel
 
@@ -22,7 +24,15 @@ class LinearModel(BaseModel):
         super().__init__(params, args)
 
         if args.objective == "regression":
-            self.model = linear_model.LinearRegression(n_jobs=-1)
+            if args.model_name =='LassoLinearModel':
+              self.model = linear_model.Lasso(alpha=params['alpha'])
+
+            elif args.model_name =='RidgeLinearModel':
+              self.model = linear_model.Ridge(alpha=params['alpha'])
+
+            else:
+              self.model = linear_model.LinearRegression(n_jobs=-1)
+            
         elif args.objective == "classification":
             self.model = linear_model.LogisticRegression(multi_class="multinomial", n_jobs=-1)
         elif args.objective == "binary":
@@ -30,9 +40,36 @@ class LinearModel(BaseModel):
 
     @classmethod
     def define_trial_parameters(cls, trial, args):
+        if args.model_name == 'LassoLinearModel' or args.model_name == 'RidgeLinearModel':
+          params = {
+            "alpha" : trial.suggest_float("alpha", 0.01, 10.0)
+          }
+        else:
+          params = dict()
+        return params
+'''
+For regression tasks, it uses the BayesianRidge model from sklearn, which is a type of Bayesian linear regression.
+
+For classification or binary tasks, it uses the GaussianNB model from sklearn, which is a Gaussian Naive Bayes model.
+'''
+
+class BayesianModel(BaseModel):
+
+    def __init__(self, params, args):
+        super().__init__(params, args)
+
+        if args.objective == "regression":
+            self.model = BayesianRidge()
+        elif args.objective == "classification" or args.objective == "binary":
+            self.model = GaussianNB()
+
+    def fit(self, X, y, X_val=None, y_val=None):
+        return super().fit(X, y, X_val, y_val)
+
+    @classmethod
+    def define_trial_parameters(cls, trial, args):
         params = dict()
         return params
-
 
 '''
     K-Neighbors Regressor - Regression/Classification based on k-nearest neighbors
