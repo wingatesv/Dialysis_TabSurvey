@@ -40,26 +40,6 @@ def augment_data(X_train, y_train, augmentation_params, apply_gaussian_noise = F
     return X_train_augmented, y_train_augmented
 
 
-# def augment_data(X_train, y_train, augmentation_params):
-#     print('Gaussian Noise Level: ', augmentation_params['gaussian_noise_level'], ' Jitter Level: ', augmentation_params['jitter_level'])
-
-#     # Perform data augmentation by adding Gaussian noise to the features (X)
-#     noise = np.random.normal(loc=0, scale=augmentation_params['gaussian_noise_level'], size=X_train.shape)
-#     X_train_augmented_noise = X_train + noise
-
-#     # Perform data augmentation by adding random jittering to the features (X)
-#     jitter = np.random.uniform(-augmentation_params['jitter_level'], augmentation_params['jitter_level'], size=X_train.shape)
-#     X_train_augmented_jitter = X_train + jitter
-
-#     # Combine the original features with the augmented features
-#     X_train = np.vstack([X_train, X_train_augmented_noise, X_train_augmented_jitter])
-
-#     # Generate new target values for the augmented samples
-#     y_train_augmented = np.hstack([y_train, y_train, y_train])
-
-#     return X_train, y_train_augmented
-
-
 def cross_validation(model, X, y, args, augmentation_params, save_model=False):
     # Record some statistics and metrics
     sc = get_scorer(args)
