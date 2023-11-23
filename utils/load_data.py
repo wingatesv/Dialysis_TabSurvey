@@ -21,7 +21,7 @@ def load_data(args):
     
     elif args.dataset == "Dialysis":  # Regression dataset
       # Define the file path
-      csv_file_path = 'data/dialysis.csv'
+      csv_file_path = 'data/dialysis_2.csv'
 
       # Read the CSV file into a pandas DataFrame without headers
       dialysis_data = pd.read_csv(csv_file_path, header=None)
