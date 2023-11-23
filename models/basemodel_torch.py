@@ -57,7 +57,7 @@ class BaseModelTorch(BaseModel):
 
         train_dataset = TensorDataset(X, y)
         train_loader = DataLoader(dataset=train_dataset, batch_size=self.args.batch_size, shuffle=True,
-                                  num_workers=4)
+                                  num_workers=2)
 
         val_dataset = TensorDataset(X_val, y_val)
         val_loader = DataLoader(dataset=val_dataset, batch_size=self.args.val_batch_size, shuffle=True)
