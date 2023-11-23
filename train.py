@@ -199,8 +199,11 @@ def main_once(args):
 
     parameters = args.parameters[args.dataset][args.model_name]
     model = model_name(parameters, args)
-
-    sc, time = cross_validation(model, X, y, args)
+    
+    args.regression_aug = False
+    augmentation_params = dict()
+    
+    sc, time = cross_validation(model, X, y, args, augmentation_params)
     print(f'Final Result of {args.num_splits}-Fold CV',sc.get_results())
     print('Training and Inference Time (s): ',time)
 
