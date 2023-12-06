@@ -20,25 +20,14 @@ def load_data(args):
         X, y = sklearn.datasets.fetch_california_housing(return_X_y=True)
     
     elif args.dataset == "Dialysis":  # Regression dataset
-      # Define the file path
-      csv_file_path = 'data/dialysis_2.csv'
+      # Assuming you are in the 'Dialysis_TabSurvey' directory
+      csv_file_path = '/content/drive/MyDrive/NTU Project/df_selected.csv'
 
       # Read the CSV file into a pandas DataFrame without headers
-      dialysis_data = pd.read_csv(csv_file_path, header=None)
+      df = pd.read_csv(csv_file_path)
 
-      # Extract features (X) and target variable (y)
-      X = dialysis_data.iloc[:, :-1].values  # Select all columns except the last one and convert to NumPy array
-      y = dialysis_data.iloc[:, -1].values   # Select the last column and convert to NumPy array
-
-
-      # Skip the first row as it might contain string headers
-      if y[0] == 'BUN':
-        X = X[1:, :]
-        y = y[1:]
-
-      # Convert the data to the appropriate data types
-      X = X.astype(np.float64)
-      y = y.astype(np.float64)
+      X = df.drop(['BUN'], axis=1)  # Dropping 'BUN' as it is the target variable
+      y = df['BUN']  # Target variable
       
 
     elif args.dataset == "Covertype":  # Multi-class classification dataset
@@ -159,9 +148,10 @@ def load_data(args):
             num_idx.append(i)
 
     if args.scale:
-        print("Scaling the data...")
-        scaler = StandardScaler()
-        X[:, num_idx] = scaler.fit_transform(X[:, num_idx])
+        if args.dataset != "Dialysis":        
+          print("Scaling the data...")
+          scaler = StandardScaler()
+          X[:, num_idx] = scaler.fit_transform(X[:, num_idx])
 
     if args.one_hot_encode:
         ohe = OneHotEncoder(sparse=False, handle_unknown='ignore')

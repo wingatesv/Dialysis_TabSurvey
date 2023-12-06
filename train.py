@@ -2,7 +2,7 @@ import logging
 import sys
 import numpy as np
 import optuna
-
+from sklearn.preprocessing import MinMaxScaler
 from models import str2model
 from utils.load_data import load_data
 from utils.scorer import get_scorer
@@ -12,32 +12,116 @@ from utils.parser import get_parser, get_given_parameters_parser
 
 from sklearn.model_selection import KFold, StratifiedKFold, train_test_split
 
-def augment_data(X_train, y_train, augmentation_params, apply_gaussian_noise = False, apply_random_jitter = True):
+def augment_data(X_train, y_train, augmentation_params):
     # Initialize augmented data as original data
     X_train_augmented = X_train
     y_train_augmented = y_train
 
-    # Check if Gaussian noise should be applied
-    if apply_gaussian_noise:
-        print('Gaussian Noise Level: ', augmentation_params['gaussian_noise_level'])
-        # Perform data augmentation by adding Gaussian noise to the features (X)
-        noise = np.random.normal(loc=0, scale=augmentation_params['gaussian_noise_level'], size=X_train.shape)
-        X_train_augmented_noise = X_train + noise
-        # Combine the original features with the augmented features
-        X_train_augmented = np.vstack([X_train_augmented, X_train_augmented_noise])
-        y_train_augmented = np.hstack([y_train_augmented, y_train])
 
-    # Check if random jitter should be applied
-    if apply_random_jitter:
-        print('Jitter Level: ', augmentation_params['jitter_level'])
-        # Perform data augmentation by adding random jittering to the features (X)
-        jitter = np.random.uniform(-augmentation_params['jitter_level'], augmentation_params['jitter_level'], size=X_train.shape)
-        X_train_augmented_jitter = X_train + jitter
-        # Combine the original features with the augmented features
-        X_train_augmented = np.vstack([X_train_augmented, X_train_augmented_jitter])
-        y_train_augmented = np.hstack([y_train_augmented, y_train])
+    print('Gaussian Noise Level: ', augmentation_params['gaussian_noise_level'])
+    # Perform data augmentation by adding Gaussian noise to the features (X)
+    noise = np.random.normal(loc=0, scale=augmentation_params['gaussian_noise_level'], size=X_train.shape)
+    X_train_augmented_noise = X_train + noise
+    # Combine the original features with the augmented features
+    X_train_augmented = np.vstack([X_train_augmented, X_train_augmented_noise])
+    y_train_augmented = np.hstack([y_train_augmented, y_train])
+
 
     return X_train_augmented, y_train_augmented
+
+
+def dialysis_cross_validation(model, X, y, args, augmentation_params, save_model=False):
+    # Record some statistics and metrics
+    sc = get_scorer(args)
+    train_timer = Timer()
+    test_timer = Timer()
+
+    # Get unique patient IDs
+    patient_ids = X['patient ID'].unique()
+  
+    # Split the patient IDs into training and testing sets
+    kf = KFold(n_splits=args.num_splits, shuffle=args.shuffle, random_state=args.seed)
+
+    for i, (train_index, test_index) in enumerate(kf.split(patient_ids)):
+
+        train_patient_ids = patient_ids[train_index]
+        test_patient_ids = patient_ids[test_index]
+
+        # Split the patient IDs into training and testing sets
+        train_patient_ids, val_patient_ids = train_test_split(train_patient_ids, test_size=0.1, random_state=args.seed)
+
+        # Split the data into training and testing sets based on the patient IDs
+        X_train = X[X['patient ID'].isin(train_patient_ids)].copy()
+        X_val = X[X['patient ID'].isin(val_patient_ids)].copy()
+        X_test = X[X['patient ID'].isin(test_patient_ids)].copy()
+        y_train = y[X['patient ID'].isin(train_patient_ids)]
+        y_val = y[X['patient ID'].isin(val_patient_ids)]
+        y_test = y[X['patient ID'].isin(test_patient_ids)]
+
+
+        # Remove the 'patient ID' column from the training and testing sets
+        X_train.drop(['patient ID'], axis=1, inplace=True)
+        X_val.drop(['patient ID'], axis=1, inplace=True)
+        X_test.drop(['patient ID'], axis=1, inplace=True)
+
+        # Convert the training and testing sets to NumPy arrays
+        X_train = X_train.values
+        X_val = X_val.values
+        X_test = X_test.values
+        y_train = y_train.values
+        y_test = y_test.values
+
+        # Apply MinMaxScaler to the training and testing sets
+        scaler = MinMaxScaler()
+        X_train = scaler.fit_transform(X_train)
+        X_val = scaler.transform(X_val)
+        X_test  = scaler.transform(X_test)
+
+        # X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=args.seed)
+
+        # Perform data augmentation on regression data
+        # if args.regression_aug:
+        #     X_train, y_train = augment_data(X_train, y_train, augmentation_params)
+
+        # Create a new unfitted version of the model
+        curr_model = model.clone()
+        print(curr_model)
+        # Train model
+        train_timer.start()
+        loss_history, val_loss_history = curr_model.fit(X_train, y_train, X_val, y_val)
+        train_timer.end()
+
+        # Test model
+        test_timer.start()
+        curr_model.predict(X_test)
+        test_timer.end()
+
+
+        # Save model weights and the truth/prediction pairs for traceability
+        curr_model.save_model_and_predictions(y_test, i)
+
+        if save_model:
+            save_loss_to_file(args, loss_history, "loss", extension=i)
+            save_loss_to_file(args, val_loss_history, "val_loss", extension=i)
+
+        # Compute scores on the output
+        sc.eval(y_test, curr_model.predictions, curr_model.prediction_probabilities)
+
+        print(f'Result of {i} fold',sc.get_results())
+
+    # Best run is saved to file
+    if save_model:
+        print("Results:", sc.get_results())
+        print("Train time (s):", round(train_timer.get_average_time(),4))
+        print("Inference time (s):", round(test_timer.get_average_time(),4))
+
+        # Save the all statistics to a file
+        save_results_to_file(args, sc.get_results(),
+                             train_timer.get_average_time(), test_timer.get_average_time(),
+                             model.params)
+
+    # print("Finished cross validation")
+    return sc, (round(train_timer.get_average_time(),4), round(test_timer.get_average_time(),4))
 
 
 def cross_validation(model, X, y, args, augmentation_params, save_model=False):
@@ -59,10 +143,6 @@ def cross_validation(model, X, y, args, augmentation_params, save_model=False):
         y_train, y_test = y[train_index], y[test_index]
 
         X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.05, random_state=args.seed)
-
-        # Perform data augmentation on regression data
-        if args.regression_aug:
-          X_train, y_train = augment_data(X_train, y_train, augmentation_params)
 
         # Create a new unfitted version of the model
         curr_model = model.clone()
@@ -135,7 +215,11 @@ class Objective(object):
         model = self.model_name(trial_params, self.args)
 
         # Cross validate the chosen hyperparameters
-        sc, time = cross_validation(model, self.X, self.y, self.args, augmentation_params)
+        if self.args.dataset == 'Dialysis':
+          sc, time = dialysis_cross_validation(model, self.X, self.y, self.args, augmentation_params)
+        else:
+          sc, time = cross_validation(model, self.X, self.y, self.args, augmentation_params)
+        
 
         save_hyperparameters_to_file(self.args, trial_params, sc.get_results(), time)
 
@@ -168,7 +252,10 @@ def main(args):
           'gaussian_noise_level': study.best_trial.params['gaussian_noise_level'],
           'jitter_level': study.best_trial.params['jitter_level']
       }
-    cross_validation(model, X, y, args, best_augmentation_params, save_model=True)
+    if args.dataset == 'Dialysis':
+      dialysis_cross_validation(model, X, y, args, best_augmentation_params, save_model=True)
+    else:
+      cross_validation(model, X, y, args, best_augmentation_params, save_model=True)
 
 
 def main_once(args):
