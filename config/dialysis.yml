@@ -13,7 +13,7 @@ gpu_ids: [0]
 data_parallel: True
 
 # Optuna parameters - https://optuna.org/
-n_trials: 2
+n_trials: 100
 direction: minimize
 
 # Cross validation parameters
@@ -37,4 +37,4 @@ num_features: 10
 num_classes: 1 # always one for regression!
 
 # Data Augmentation
-# regression_aug: True
+regression_aug: True

@@ -2,32 +2,19 @@ import logging
 import sys
 import numpy as np
 import optuna
+import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection import KFold, StratifiedKFold, train_test_split
+
 from models import str2model
 from utils.load_data import load_data
 from utils.scorer import get_scorer
 from utils.timer import Timer
 from utils.io_utils import save_results_to_file, save_hyperparameters_to_file, save_loss_to_file
 from utils.parser import get_parser, get_given_parameters_parser
-
-from sklearn.model_selection import KFold, StratifiedKFold, train_test_split
-
-def augment_data(X_train, y_train, augmentation_params):
-    # Initialize augmented data as original data
-    X_train_augmented = X_train
-    y_train_augmented = y_train
+from utils.augmentation import mixup, cutmix, add_gaussian_noise, add_random_jitter
 
 
-    print('Gaussian Noise Level: ', augmentation_params['gaussian_noise_level'])
-    # Perform data augmentation by adding Gaussian noise to the features (X)
-    noise = np.random.normal(loc=0, scale=augmentation_params['gaussian_noise_level'], size=X_train.shape)
-    X_train_augmented_noise = X_train + noise
-    # Combine the original features with the augmented features
-    X_train_augmented = np.vstack([X_train_augmented, X_train_augmented_noise])
-    y_train_augmented = np.hstack([y_train_augmented, y_train])
-
-
-    return X_train_augmented, y_train_augmented
 
 
 def dialysis_cross_validation(model, X, y, args, augmentation_params, save_model=False):
@@ -58,6 +45,18 @@ def dialysis_cross_validation(model, X, y, args, augmentation_params, save_model
         y_val = y[X['patient ID'].isin(val_patient_ids)]
         y_test = y[X['patient ID'].isin(test_patient_ids)]
 
+        print('Before: ', X_train.shape)
+
+        # Perform data augmentation on regression data
+        if args.regression_aug:
+          mixup_df = mixup(train_patient_ids, augmentation_params)
+          cutmix_df = cutmix(train_patient_ids, augmentation_params)
+          noise_df = add_gaussian_noise(train_patient_ids, augmentation_params)
+          jitter_df = add_random_jitter(train_patient_ids, augmentation_params)
+
+          X_train = pd.concat([X_train, mixup_df.drop(['BUN'], axis=1), cutmix_df.drop(['BUN'], axis=1), noise_df.drop(['BUN'], axis=1), jitter_df.drop(['BUN'], axis=1)])
+          y_train = pd.concat([y_train, mixup_df['BUN'], cutmix_df['BUN'], noise_df['BUN'], jitter_df['BUN']])
+          print('After: ', X_train.shape)
 
         # Remove the 'patient ID' column from the training and testing sets
         X_train.drop(['patient ID'], axis=1, inplace=True)
@@ -77,15 +76,9 @@ def dialysis_cross_validation(model, X, y, args, augmentation_params, save_model
         X_val = scaler.transform(X_val)
         X_test  = scaler.transform(X_test)
 
-        # X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=args.seed)
-
-        # Perform data augmentation on regression data
-        # if args.regression_aug:
-        #     X_train, y_train = augment_data(X_train, y_train, augmentation_params)
 
         # Create a new unfitted version of the model
         curr_model = model.clone()
-        print(curr_model)
         # Train model
         train_timer.start()
         loss_history, val_loss_history = curr_model.fit(X_train, y_train, X_val, y_val)
@@ -204,6 +197,8 @@ class Objective(object):
         augmentation_params = dict()
         if self.args.regression_aug:
           augmentation_params = {
+              'mixup_lambda': trial.suggest_categorical("mixup_lambda", [1/6, 2/6, 3/6, 4/6, 5/6, 6/6]),
+              'cutmix_lambda': trial.suggest_categorical("cutmix_lambda", [1/6, 2/6, 3/6, 4/6, 5/6, 6/6]),
               'gaussian_noise_level': trial.suggest_float("gaussian_noise_level", 0.01, 0.5),
               'jitter_level': trial.suggest_float("jitter_level", 0.01, 0.5)
           }
@@ -249,6 +244,8 @@ def main(args):
     best_augmentation_params = dict()
     if args.regression_aug:
       best_augmentation_params = {
+          'mixup_lambda': study.best_trial.params['mixup_lambda'],
+          'cutmix_lambda': study.best_trial.params['cutmix_lambda'],
           'gaussian_noise_level': study.best_trial.params['gaussian_noise_level'],
           'jitter_level': study.best_trial.params['jitter_level']
       }
