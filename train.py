@@ -68,6 +68,7 @@ def dialysis_cross_validation(model, X, y, args, augmentation_params, save_model
         X_val = X_val.values
         X_test = X_test.values
         y_train = y_train.values
+        y_val = y_val.values
         y_test = y_test.values
 
         # Apply MinMaxScaler to the training and testing sets
