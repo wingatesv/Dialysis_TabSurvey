@@ -7,13 +7,15 @@ model_name: DeepGBM # LinearModel, KNN, SVM, DecisionTree, RandomForest, MLP
 objective: regression
 optimize_hyperparameters: True
 
+data_path: /content/drive/MyDrive/NTU Project/df_imputed.csv
+
 # GPU parameters
 use_gpu: False
 gpu_ids: [0]
 data_parallel: True
 
 # Optuna parameters - https://optuna.org/
-n_trials: 100
+n_trials: 1
 direction: minimize
 
 # Cross validation parameters
@@ -37,4 +39,4 @@ num_features: 10
 num_classes: 1 # always one for regression!
 
 # Data Augmentation
-regression_aug: True
+# regression_aug: True

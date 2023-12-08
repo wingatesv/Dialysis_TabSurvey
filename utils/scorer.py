@@ -12,7 +12,6 @@ def get_scorer(args):
     else:
         raise NotImplementedError("No scorer for \"" + args.objective + "\" implemented")
 
-
 class Scorer:
 
     """
@@ -43,6 +42,9 @@ class RegScorer(Scorer):
 
         self.mses.append(mse)
         self.r2s.append(r2)
+
+        print('MSE FOLD: ', self.mses)
+        print('R2 FOLD: ', self.r2s)
 
         return {"MSE": mse, "R2": r2}
 

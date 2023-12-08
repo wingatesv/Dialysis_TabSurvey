@@ -16,6 +16,8 @@ def get_parser():
                                                                                       "binary"],
                help="Set the type of the task")
 
+    parser.add('--data_path', required=True, type=str, default="/content/drive/MyDrive/NTU Project/df_imputed.csv", help="The data path")
+
     parser.add('--use_gpu', action="store_true", help="Set to true if GPU is available")
     parser.add('--gpu_ids', type=int, action="append", help="IDs of the GPUs used when data_parallel is true")
     parser.add('--data_parallel', action="store_true", help="Distribute the training over multiple GPUs")

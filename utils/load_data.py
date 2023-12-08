@@ -21,10 +21,10 @@ def load_data(args):
     
     elif args.dataset == "Dialysis":  # Regression dataset
       # Assuming you are in the 'Dialysis_TabSurvey' directory
-      csv_file_path = '/content/drive/MyDrive/NTU Project/df_selected.csv'
-
+ 
+      print('Data path: ',args.data_path)
       # Read the CSV file into a pandas DataFrame without headers
-      df = pd.read_csv(csv_file_path)
+      df = pd.read_csv(args.data_path)
 
       X = df.drop(['BUN'], axis=1)  # Dropping 'BUN' as it is the target variable
       y = df['BUN']  # Target variable
@@ -135,17 +135,18 @@ def load_data(args):
     num_idx = []
     args.cat_dims = []
 
+    if args.dataset != "Dialysis":  
     # Preprocess data
-    for i in range(args.num_features):
-        if args.cat_idx and i in args.cat_idx:
-            le = LabelEncoder()
-            X[:, i] = le.fit_transform(X[:, i])
+      for i in range(args.num_features):
+          if args.cat_idx and i in args.cat_idx:
+              le = LabelEncoder()
+              X[:, i] = le.fit_transform(X[:, i])
 
-            # Setting this?
-            args.cat_dims.append(len(le.classes_))
+              # Setting this?
+              args.cat_dims.append(len(le.classes_))
 
-        else:
-            num_idx.append(i)
+          else:
+              num_idx.append(i)
 
     if args.scale:
         if args.dataset != "Dialysis":        

@@ -33,7 +33,7 @@ def dialysis_cross_validation(model, X, y, args, augmentation_params, save_model
 
         train_patient_ids = patient_ids[train_index]
         test_patient_ids = patient_ids[test_index]
-
+        print('Test patient IDs: ', test_patient_ids)
         # Split the patient IDs into training and testing sets
         train_patient_ids, val_patient_ids = train_test_split(train_patient_ids, test_size=0.1, random_state=args.seed)
 
@@ -45,7 +45,7 @@ def dialysis_cross_validation(model, X, y, args, augmentation_params, save_model
         y_val = y[X['patient ID'].isin(val_patient_ids)]
         y_test = y[X['patient ID'].isin(test_patient_ids)]
 
-        print('Before: ', X_train.shape)
+        print('Train Set: ', X_train.shape)
 
         # Perform data augmentation on regression data
         if args.regression_aug:
@@ -56,7 +56,7 @@ def dialysis_cross_validation(model, X, y, args, augmentation_params, save_model
 
           X_train = pd.concat([X_train, mixup_df.drop(['BUN'], axis=1), cutmix_df.drop(['BUN'], axis=1), noise_df.drop(['BUN'], axis=1), jitter_df.drop(['BUN'], axis=1)])
           y_train = pd.concat([y_train, mixup_df['BUN'], cutmix_df['BUN'], noise_df['BUN'], jitter_df['BUN']])
-          print('After: ', X_train.shape)
+          print('Augmented Train Set: ', X_train.shape)
 
         # Remove the 'patient ID' column from the training and testing sets
         X_train.drop(['patient ID'], axis=1, inplace=True)
