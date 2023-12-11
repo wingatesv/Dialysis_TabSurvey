@@ -15,7 +15,7 @@ gpu_ids: [0]
 data_parallel: True
 
 # Optuna parameters - https://optuna.org/
-n_trials: 20
+n_trials: 1
 direction: minimize
 
 # Cross validation parameters
@@ -35,7 +35,7 @@ epochs: 500
 logging_period: 100
 
 # About the data
-num_features: 10
+num_features: 23
 num_classes: 1 # always one for regression!
 
 # Data Augmentation

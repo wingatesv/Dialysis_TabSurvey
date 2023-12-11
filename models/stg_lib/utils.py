@@ -4,6 +4,7 @@ import torch.optim as optim
 import numpy as np 
 import six
 import collections
+import collections.abc 
 import copy
 from torch.utils.data import Dataset
 from collections import defaultdict
@@ -212,11 +213,11 @@ def get_optimizer(optimizer, model, *args, **kwargs):
 def stmap(func, iterable):
     if isinstance(iterable, six.string_types):
         return func(iterable)
-    elif isinstance(iterable, (collections.Sequence, collections.UserList)):
+    elif isinstance(iterable, (collections.abc.Sequence, collections.UserList)):
         return [stmap(func, v) for v in iterable]
-    elif isinstance(iterable, collections.Set):
+    elif isinstance(iterable, collections.abc.Set):
         return {stmap(func, v) for v in iterable}
-    elif isinstance(iterable, (collections.Mapping, collections.UserDict)):
+    elif isinstance(iterable, (collections.abc.Mapping, collections.UserDict)):
         return {k: stmap(func, v) for k, v in iterable.items()}
     else:
         return func(iterable)
