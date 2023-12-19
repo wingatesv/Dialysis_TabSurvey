@@ -200,8 +200,8 @@ class Objective(object):
           augmentation_params = {
               'mixup_lambda': trial.suggest_categorical("mixup_lambda", [1/6, 2/6, 3/6, 4/6, 5/6, 6/6]),
               'cutmix_lambda': trial.suggest_categorical("cutmix_lambda", [1/6, 2/6, 3/6, 4/6, 5/6, 6/6]),
-              'gaussian_noise_level': trial.suggest_float("gaussian_noise_level", 0.01, 0.5),
-              'jitter_level': trial.suggest_float("jitter_level", 0.01, 0.5)
+              'gaussian_noise_level': trial.suggest_float("gaussian_noise_level", 0, 0.5),
+              'jitter_level': trial.suggest_float("jitter_level", 0, 0.5)
           }
 
           # Include augmentation_params into trial_params
