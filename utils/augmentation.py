@@ -1,10 +1,10 @@
 import pandas as pd
 import numpy as np
 
-def mixup(patient_ids, augmentation_params):
+def mixup(patient_ids, data_path, augmentation_params):
     mixup_df = pd.DataFrame()
 
-    data = pd.read_csv('/content/drive/MyDrive/NTU Project/df_selected.csv')
+    data = pd.read_csv(data_path)
 
     print('Mixup lambda: ', augmentation_params['mixup_lambda'])
     # For each pair of patient IDs, create mixup data and add it to mixup_df
@@ -37,9 +37,9 @@ def mixup(patient_ids, augmentation_params):
 
     return mixup_df
 
-def cutmix(patient_ids, augmentation_params):
+def cutmix(patient_ids, data_path, augmentation_params):
     cutmix_df = pd.DataFrame()
-    data = pd.read_csv('/content/drive/MyDrive/NTU Project/df_selected.csv')
+    data = pd.read_csv(data_path)
 
    
     print('Cutmix lambda: ', augmentation_params['cutmix_lambda'])
@@ -76,10 +76,10 @@ def cutmix(patient_ids, augmentation_params):
 
 
 
-def add_gaussian_noise(patient_ids, augmentation_params):
+def add_gaussian_noise(patient_ids, data_path, target_variable, augmentation_params):
 
     noise_df = pd.DataFrame()
-    data = pd.read_csv('/content/drive/MyDrive/NTU Project/df_selected.csv')
+    data = pd.read_csv(data_path)
 
     print('Gaussian Noise Level: ', augmentation_params['gaussian_noise_level'])
 
@@ -88,7 +88,10 @@ def add_gaussian_noise(patient_ids, augmentation_params):
         patient_data = data[data['patient ID'] == patient_id].copy()
 
         # Only apply Gaussian noise to selected columns
-        noise_columns = ['b2-M', '255nm', '280nm', '310nm', 'current dehydration volume', 'hourly dehydration volume', 'transmembrane pressure']
+
+        excluded_columns = [target_variable, 'patient ID']
+        noise_columns = [col for col in data.columns if col not in excluded_columns]
+
 
         # Add Gaussian noise to each value in the selected columns
         for column in noise_columns:
@@ -105,9 +108,9 @@ def add_gaussian_noise(patient_ids, augmentation_params):
 
 
 
-def add_random_jitter(patient_ids, augmentation_params):
+def add_random_jitter(patient_ids, data_path, target_variable, augmentation_params):
     jitter_df = pd.DataFrame()
-    data = pd.read_csv('/content/drive/MyDrive/NTU Project/df_selected.csv')
+    data = pd.read_csv(data_path)
 
     print('Jitter Level: ', augmentation_params['jitter_level'])
 
@@ -116,7 +119,8 @@ def add_random_jitter(patient_ids, augmentation_params):
         patient_data = data[data['patient ID'] == patient_id].copy()
 
         # Only apply random jitter to selected columns
-        jitter_columns = ['b2-M', '255nm', '280nm', '310nm', 'current dehydration volume', 'hourly dehydration volume', 'transmembrane pressure']
+        excluded_columns = [target_variable, 'patient ID']
+        jitter_columns = [col for col in data.columns if col not in excluded_columns]
 
         # Add random jitter to each value in the selected columns
         for column in jitter_columns:

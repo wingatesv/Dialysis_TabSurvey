@@ -49,6 +49,7 @@ def get_parser():
                                                              "automatically, when the load_data function is used.")
     
     parser.add('--regression_aug', action="store_true", help="Data augmentation for regression data.")
+    parser.add('--target_variable', type=str, default="BUN", help="Target variable for the regression data.")
 
     # Todo: Validate the arguments
 

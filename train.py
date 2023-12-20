@@ -49,13 +49,13 @@ def dialysis_cross_validation(model, X, y, args, augmentation_params, save_model
 
         # Perform data augmentation on regression data
         if args.regression_aug:
-          mixup_df = mixup(train_patient_ids, augmentation_params)
-          cutmix_df = cutmix(train_patient_ids, augmentation_params)
-          noise_df = add_gaussian_noise(train_patient_ids, augmentation_params)
-          jitter_df = add_random_jitter(train_patient_ids, augmentation_params)
+          mixup_df = mixup(train_patient_ids, args.data_path, augmentation_params)
+          cutmix_df = cutmix(train_patient_ids, args.data_path, augmentation_params)
+          noise_df = add_gaussian_noise(train_patient_ids, args.data_path, args.target_variable, augmentation_params)
+          jitter_df = add_random_jitter(train_patient_ids, args.data_path, args.target_variable, augmentation_params)
 
-          X_train = pd.concat([X_train, mixup_df.drop(['BUN'], axis=1), cutmix_df.drop(['BUN'], axis=1), noise_df.drop(['BUN'], axis=1), jitter_df.drop(['BUN'], axis=1)])
-          y_train = pd.concat([y_train, mixup_df['BUN'], cutmix_df['BUN'], noise_df['BUN'], jitter_df['BUN']])
+          X_train = pd.concat([X_train, mixup_df.drop([args.target_variable], axis=1), cutmix_df.drop([args.target_variable], axis=1), noise_df.drop([args.target_variable], axis=1), jitter_df.drop([args.target_variable], axis=1)])
+          y_train = pd.concat([y_train, mixup_df[args.target_variable], cutmix_df[args.target_variable], noise_df[args.target_variable], jitter_df[args.target_variable]])
           print('Augmented Train Set: ', X_train.shape)
 
         # Remove the 'patient ID' column from the training and testing sets
