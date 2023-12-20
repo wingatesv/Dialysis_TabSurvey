@@ -14,7 +14,7 @@ import numpy as np
 class ModelTree(BaseModel):
 
     def __init__(self, params, args):
-        model_params = {key: params[key] for key in params if key not in ['gaussian_noise_level', 'jitter_level']}
+        model_params = {key: params[key] for key in params if key not in ['mixup_lambda', 'cutmix_lambda', 'gaussian_noise_level', 'jitter_level']}
         super().__init__(model_params, args)
         if args.objective == "regression":
             self.model = ModelTreeRegressor(**self.params)
