@@ -118,7 +118,9 @@ class SVM(BaseModel):
         super().__init__(params, args)
 
         if args.objective == "regression":
-            self.model = svm.SVR(C=params["C"])
+            kernel = 'sigmoid' if args.num_features < 5 else 'rbf'
+            print('Kernel: ', kernel)
+            self.model = svm.SVR(C=params["C"], kernel=kernel)
         elif args.objective == "classification" or args.objective == "binary":
             self.model = svm.SVC(C=params["C"], probability=True)
 
