@@ -15,7 +15,8 @@ import torch
 class STG(BaseModelTorch):
 
     def __init__(self, params, args):
-        super().__init__(params, args)
+        model_params = {key: params[key] for key in params if key not in ['mixup_lambda', 'cutmix_lambda', 'gaussian_noise_level', 'jitter_level']}
+        super().__init__(model_params, args)
 
         task = "classification" if self.args.objective == "binary" else self.args.objective
         out_dim = 2 if self.args.objective == "binary" else self.args.num_classes
