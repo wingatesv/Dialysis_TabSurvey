@@ -8,7 +8,7 @@ objective: regression
 optimize_hyperparameters: True
 
 data_path: /content/Dialysis_TabSurvey/data/df_imputed.csv
-
+# data_path: /content/Dialysis_TabSurvey/data/df_selected_4.csv
 # GPU parameters
 use_gpu: False
 gpu_ids: [0]
@@ -35,7 +35,7 @@ epochs: 500
 logging_period: 100
 
 # About the data
-num_features: 23
+num_features: 23 #23, 4
 num_classes: 1 # always one for regression!
 
 # Data Augmentation
