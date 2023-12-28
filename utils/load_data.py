@@ -26,8 +26,8 @@ def load_data(args):
       # Read the CSV file into a pandas DataFrame without headers
       df = pd.read_csv(args.data_path)
 
-      X = df.drop(['BUN'], axis=1)  # Dropping 'BUN' as it is the target variable
-      y = df['BUN']  # Target variable
+      X = df.drop([args.target_variable], axis=1)  # Dropping 'BUN' as it is the target variable
+      y = df[args.target_variable]  # Target variable
       
 
     elif args.dataset == "Covertype":  # Multi-class classification dataset
