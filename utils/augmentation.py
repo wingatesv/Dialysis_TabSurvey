@@ -35,6 +35,17 @@ def mixup(patient_ids, data_path, augmentation_params):
 
         mixup_df = pd.concat([mixup_df, mixup_data])
 
+        # Now do the reverse: take the first part of patient2's data and concatenate it with the second part of patient1's data
+        patient_data1_mixup = patient_data1.iloc[num_data_points1:]
+        patient_data2_mixup = patient_data2.iloc[:-num_data_points2]
+
+        mixup_data2 = pd.concat([patient_data2_mixup, patient_data1_mixup])
+
+        new_patient_id2 = 'mixup_' + str(np.random.randint(1e6))
+        mixup_data2['patient ID'] = new_patient_id2
+
+        mixup_df = pd.concat([mixup_df, mixup_data2])
+
     return mixup_df
 
 def cutmix(patient_ids, data_path, augmentation_params):
@@ -71,7 +82,16 @@ def cutmix(patient_ids, data_path, augmentation_params):
 
         cutmix_df = pd.concat([cutmix_df, patient_data1_cutmix])
 
+        # Now do the reverse: take the first part of patient2's data and concatenate it with the second part of patient1's data
+        patient_data2_cutmix = pd.concat([patient_data2.iloc[:start_idx], patient_data1.iloc[start_idx:end_idx], patient_data2.iloc[end_idx:]])
+
+        new_patient_id2 = 'cutmix_' + str(np.random.randint(1e6))
+        patient_data2_cutmix['patient ID'] = new_patient_id2
+
+        cutmix_df = pd.concat([cutmix_df, patient_data2_cutmix])
+
     return cutmix_df
+
 
 
 
