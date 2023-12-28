@@ -34,10 +34,13 @@ def dialysis_cross_validation(model, X, y, args, augmentation_params, save_model
 
         train_patient_ids = patient_ids[train_index]
         test_patient_ids = patient_ids[test_index]
-        print('Test patient IDs: ', test_patient_ids)
         # Split the patient IDs into training and testing sets
         train_patient_ids, val_patient_ids = train_test_split(train_patient_ids, test_size=0.1, random_state=args.seed)
-
+        
+        print('Number of Train patients: ',len(train_patient_ids))
+        print('Number of Val patients: ',len(val_patient_ids))
+        print('Number of Test patients: ',len(test_patient_ids))
+        
         # Split the data into training and testing sets based on the patient IDs
         X_train = X[X['patient ID'].isin(train_patient_ids)].copy()
         X_val = X[X['patient ID'].isin(val_patient_ids)].copy()
