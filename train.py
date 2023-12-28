@@ -43,9 +43,9 @@ def dialysis_cross_validation(model, X, y, args, augmentation_params, save_model
         X_val = X[X['patient ID'].isin(val_patient_ids)].copy()
         X_test = X[X['patient ID'].isin(test_patient_ids)].copy()
         
-        y_train = y[y['patient ID'].isin(train_patient_ids)]
-        y_val = y[y['patient ID'].isin(val_patient_ids)]
-        y_test = y[y['patient ID'].isin(test_patient_ids)]
+        y_train = y[y['patient ID'].isin(train_patient_ids)].copy()
+        y_val = y[y['patient ID'].isin(val_patient_ids)].copy()
+        y_test = y[y['patient ID'].isin(test_patient_ids)].copy()
 
         print('Train Set: ', X_train.shape)
 
