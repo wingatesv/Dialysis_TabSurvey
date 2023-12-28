@@ -50,9 +50,16 @@ def dialysis_cross_validation(model, X, y, args, augmentation_params, save_model
         # Perform data augmentation on regression data
         if args.regression_aug:
           mixup_df = mixup(train_patient_ids, args.data_path, augmentation_params)
+          print('Mixup df shape: ',mixup_df.shape)
+
           cutmix_df = cutmix(train_patient_ids, args.data_path, augmentation_params)
+          print('Cutmix df shape: ',cutmix_df.shape)
+
           noise_df = add_gaussian_noise(train_patient_ids, args.data_path, args.target_variable, augmentation_params)
+          print('Noise df shape: ',noise_df.shape)
+
           jitter_df = add_random_jitter(train_patient_ids, args.data_path, args.target_variable, augmentation_params)
+          print('Jitter df shape: ',jitter_df.shape)
 
           X_train = pd.concat([X_train, mixup_df.drop([args.target_variable], axis=1), cutmix_df.drop([args.target_variable], axis=1), noise_df.drop([args.target_variable], axis=1), jitter_df.drop([args.target_variable], axis=1)])
           y_train = pd.concat([y_train, mixup_df[args.target_variable], cutmix_df[args.target_variable], noise_df[args.target_variable], jitter_df[args.target_variable]])
