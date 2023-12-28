@@ -14,7 +14,8 @@ from utils.io_utils import save_model_to_file, load_model_from_file
 class TabNet(BaseModelTorch):
 
     def __init__(self, params, args):
-        super().__init__(params, args)
+        model_params = {key: params[key] for key in params if key not in ['mixup_lambda', 'cutmix_lambda', 'gaussian_noise_level', 'jitter_level']}
+        super().__init__(model_params, args)
 
         # Paper recommends to be n_d and n_a the same
         self.params["n_a"] = self.params["n_d"]
