@@ -109,7 +109,7 @@ def add_gaussian_noise(patient_ids, data_path, target_variable, augmentation_par
 
         # Only apply Gaussian noise to selected columns
 
-        excluded_columns = [target_variable, 'patient ID']
+        excluded_columns = [target_variable, 'patient ID', 'collection time']
         noise_columns = [col for col in data.columns if col not in excluded_columns]
 
 
@@ -139,7 +139,7 @@ def add_random_jitter(patient_ids, data_path, target_variable, augmentation_para
         patient_data = data[data['patient ID'] == patient_id].copy()
 
         # Only apply random jitter to selected columns
-        excluded_columns = [target_variable, 'patient ID']
+        excluded_columns = [target_variable, 'patient ID', 'collection time']
         jitter_columns = [col for col in data.columns if col not in excluded_columns]
 
         # Add random jitter to each value in the selected columns
