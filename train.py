@@ -80,6 +80,9 @@ def dialysis_cross_validation(model, X, y, args, augmentation_params, save_model
           X_train = pd.concat([X_train[X_train['patient ID'] == id] for id in train_unique_patient_ids])
           y_train = pd.concat([y_train[y_train['patient ID'] == id] for id in train_unique_patient_ids])
 
+          X_train.to_csv('X_shuffled_train.csv', index=False)
+          y_train.to_csv('y_shuffled_train.csv', index=False)
+
 
         # Remove the 'patient ID' column from the training and testing sets
         X_train.drop(['patient ID'], axis=1, inplace=True)
@@ -90,22 +93,24 @@ def dialysis_cross_validation(model, X, y, args, augmentation_params, save_model
         y_val.drop(['patient ID'], axis=1, inplace=True)
         y_test.drop(['patient ID'], axis=1, inplace=True)
 
-        print('Final X_train Shape: ', X_train.shape)
-        print('Final y_train shape: ', y_train.shape)
-        
         # Convert the training and testing sets to NumPy arrays
         X_train = X_train.values
         X_val = X_val.values
         X_test = X_test.values
-        y_train = y_train.values
-        y_val = y_val.values
-        y_test = y_test.values
+
+        y_train = y_train.values.squeeze()
+        y_val = y_val.values.squeeze()
+        y_test = y_test.values.squeeze()
+
+        print('Final X_train Shape: ', X_train.shape)
+        print('Final y_train shape: ', y_train.shape)
 
         # Apply MinMaxScaler to the training and testing sets
         scaler = MinMaxScaler()
         X_train = scaler.fit_transform(X_train)
         X_val = scaler.transform(X_val)
         X_test  = scaler.transform(X_test)
+
 
         # Create a new unfitted version of the model
         curr_model = model.clone()
