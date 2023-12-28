@@ -5,6 +5,7 @@ import optuna
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import KFold, StratifiedKFold, train_test_split
+import random 
 
 from models import str2model
 from utils.load_data import load_data
@@ -41,9 +42,10 @@ def dialysis_cross_validation(model, X, y, args, augmentation_params, save_model
         X_train = X[X['patient ID'].isin(train_patient_ids)].copy()
         X_val = X[X['patient ID'].isin(val_patient_ids)].copy()
         X_test = X[X['patient ID'].isin(test_patient_ids)].copy()
-        y_train = y[X['patient ID'].isin(train_patient_ids)]
-        y_val = y[X['patient ID'].isin(val_patient_ids)]
-        y_test = y[X['patient ID'].isin(test_patient_ids)]
+        
+        y_train = y[y['patient ID'].isin(train_patient_ids)]
+        y_val = y[y['patient ID'].isin(val_patient_ids)]
+        y_test = y[y['patient ID'].isin(test_patient_ids)]
 
         print('Train Set: ', X_train.shape)
 
@@ -62,14 +64,35 @@ def dialysis_cross_validation(model, X, y, args, augmentation_params, save_model
           print('Jitter df shape: ',jitter_df.shape)
 
           X_train = pd.concat([X_train, mixup_df.drop([args.target_variable], axis=1), cutmix_df.drop([args.target_variable], axis=1), noise_df.drop([args.target_variable], axis=1), jitter_df.drop([args.target_variable], axis=1)])
-          y_train = pd.concat([y_train, mixup_df[args.target_variable], cutmix_df[args.target_variable], noise_df[args.target_variable], jitter_df[args.target_variable]])
+          y_train = pd.concat([y_train, mixup_df[['patient ID', args.target_variable]], cutmix_df[['patient ID', args.target_variable]], noise_df[['patient ID', args.target_variable]], jitter_df[['patient ID', args.target_variable]]])
           print('Augmented Train Set: ', X_train.shape)
+          print('Augmented y train Set: ', y_train.shape)
+
+          # Get a list of unique patient IDs
+          train_unique_patient_ids = X_train['patient ID'].unique()
+          
+          # Set the seed
+          random.seed(args.seed)
+          # Shuffle the patient IDs
+          random.shuffle(train_unique_patient_ids)
+
+          # Concatenate the data for each patient ID in the shuffled list
+          X_train = pd.concat([X_train[X_train['patient ID'] == id] for id in train_unique_patient_ids])
+          y_train = pd.concat([y_train[y_train['patient ID'] == id] for id in train_unique_patient_ids])
+
 
         # Remove the 'patient ID' column from the training and testing sets
         X_train.drop(['patient ID'], axis=1, inplace=True)
         X_val.drop(['patient ID'], axis=1, inplace=True)
         X_test.drop(['patient ID'], axis=1, inplace=True)
 
+        y_train.drop(['patient ID'], axis=1, inplace=True)
+        y_val.drop(['patient ID'], axis=1, inplace=True)
+        y_test.drop(['patient ID'], axis=1, inplace=True)
+
+        print('Final X_train Shape: ', X_train.shape)
+        print('Final y_train shape: ', y_train.shape)
+        
         # Convert the training and testing sets to NumPy arrays
         X_train = X_train.values
         X_val = X_val.values
@@ -83,7 +106,6 @@ def dialysis_cross_validation(model, X, y, args, augmentation_params, save_model
         X_train = scaler.fit_transform(X_train)
         X_val = scaler.transform(X_val)
         X_test  = scaler.transform(X_test)
-
 
         # Create a new unfitted version of the model
         curr_model = model.clone()
