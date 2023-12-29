@@ -26,6 +26,8 @@ class VIME(BaseModelTorch):
         self.model_self = VIMESelf(args.num_features).to(self.device)
         self.model_semi = VIMESemi(args, args.num_features, args.num_classes).to(self.device)
 
+        self.data_shuffle = args.data_shuffle
+
         if self.args.data_parallel:
             self.model_self = nn.DataParallel(self.model_self, device_ids=self.args.gpu_ids)
             self.model_semi = nn.DataParallel(self.model_semi, device_ids=self.args.gpu_ids)
@@ -99,7 +101,7 @@ class VIME(BaseModelTorch):
         m_label = torch.tensor(m_label).float()
         X = torch.tensor(X).float()
         train_dataset = TensorDataset(x_tilde, m_label, X)
-        train_loader = DataLoader(dataset=train_dataset, batch_size=self.args.batch_size, shuffle=True, num_workers=2)
+        train_loader = DataLoader(dataset=train_dataset, batch_size=self.args.batch_size, shuffle=self.data_shuffle, num_workers=2)
 
         for epoch in range(10):
             for batch_X, batch_mask, batch_feat in train_loader:
@@ -138,7 +140,7 @@ class VIME(BaseModelTorch):
         optimizer = optim.AdamW(self.model_semi.parameters())
 
         train_dataset = TensorDataset(X, y, x_unlab)
-        train_loader = DataLoader(dataset=train_dataset, batch_size=self.args.batch_size, shuffle=True, num_workers=2,
+        train_loader = DataLoader(dataset=train_dataset, batch_size=self.args.batch_size, shuffle=self.data_shuffle, num_workers=2,
                                   drop_last=True)
 
         val_dataset = TensorDataset(X_val, y_val)
