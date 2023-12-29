@@ -18,6 +18,8 @@ class TabTransformer(BaseModelTorch):
     def __init__(self, params, args):
         super().__init__(params, args)
 
+        self.data_shuffle = args.data_shuffle
+        
         if args.cat_idx:
             self.num_idx = list(set(range(args.num_features)) - set(args.cat_idx))
             num_continuous = args.num_features - len(args.cat_idx)
@@ -77,11 +79,11 @@ class TabTransformer(BaseModelTorch):
             y_val = y_val.float()
 
         train_dataset = TensorDataset(X, y)
-        train_loader = DataLoader(dataset=train_dataset, batch_size=self.batch_size, shuffle=True,
+        train_loader = DataLoader(dataset=train_dataset, batch_size=self.batch_size, shuffle=self.data_shuffle,
                                   num_workers=2)
 
         val_dataset = TensorDataset(X_val, y_val)
-        val_loader = DataLoader(dataset=val_dataset, batch_size=self.args.val_batch_size, shuffle=True)
+        val_loader = DataLoader(dataset=val_dataset, batch_size=self.args.val_batch_size, shuffle=False)
 
         min_val_loss = float("inf")
         min_val_loss_idx = 0
