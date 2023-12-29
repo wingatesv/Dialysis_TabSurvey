@@ -29,6 +29,7 @@ target_encode: False
 
 # Training parameters
 batch_size: 16
+data_shuffle: False # time series data should not be shuffled
 val_batch_size: 8
 early_stopping_rounds: 20
 epochs: 500
