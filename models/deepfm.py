@@ -68,7 +68,8 @@ class DeepFM(BaseModelTorch):
                                                         epochs=self.args.epochs,
                                                         validation_data=(X_val_dict, y_val), labels=labels,
                                                         early_stopping=True,
-                                                        patience=self.args.early_stopping_rounds)
+                                                        patience=self.args.early_stopping_rounds,
+                                                        shuffle=self.args.data_shuffle)
         return loss_history, val_loss_history
 
     def predict_helper(self, X):
