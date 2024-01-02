@@ -34,6 +34,7 @@ class RLN(BaseModel):
             'epochs': args.epochs,
             'batch_size': self.args.batch_size,
             'verbose': 1,
+            'shuffle': args.data_shuffle,
         }
 
         if args.objective == "regression":
