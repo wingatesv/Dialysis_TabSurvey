@@ -33,7 +33,7 @@ class STG(BaseModelTorch):
             y, y_val = y.reshape(-1, 1), y_val.reshape(-1, 1)
 
         loss, val_loss = self.model.fit(X, y, nr_epochs=self.args.epochs, valid_X=X_val, valid_y=y_val,
-                                        print_interval=1)  # self.args.logging_period # early_stop=True
+                                        print_interval=1, shuffle=self.args.data_shuffle)  # self.args.logging_period # early_stop=True
 
         return loss, val_loss
 
