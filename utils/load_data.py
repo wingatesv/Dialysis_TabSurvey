@@ -29,7 +29,6 @@ def load_data(args):
       if args.use_absorbance_only:
           # filter out the df to only use the columns: Patient ID, collection time, BUN, 255nm, 280nm and 310nm
           columns_to_use = ['patient ID', 'collection time', args.target_variable, '255nm', '280nm', '310nm']
-          df = df[columns_to_use]
           args.num_features = 4
       else:
           columns_to_use = [ 'patient ID', 'collection time', args.target_variable, '255nm', '280nm', '310nm', 
@@ -38,10 +37,9 @@ def load_data(args):
                             'dialysate ion concentration', 'transmembrane pressure', 'dialysate flow rate',
                             'duration of dialysate waste', 'ultrafiltration coefficient', 'dialysis day',
                             'age', 'systolic pressure', 'duration of dialysis', 'height', 'dry body weight']
-
-          df = df[columns_to_use]
           args.num_features = 22
           
+      df = df[columns_to_use]
       df.info()
       X = df.drop([args.target_variable], axis=1)  # Dropping the target variable
       y = df[['patient ID', args.target_variable]]  # Target variables and patientID
