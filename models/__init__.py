@@ -9,11 +9,15 @@ def str2model(model):
         from models.baseline_models import LinearModel
         return LinearModel
 
-    elif model == "LassoLinearModel":
-        from models.baseline_models import LinearModel
-        return LinearModel
+    # elif model == "LassoLinearModel":
+    #     from models.baseline_models import LinearModel
+    #     return LinearModel
     
-    elif model == "RidgeLinearModel":
+    # elif model == "RidgeLinearModel":
+    #     from models.baseline_models import LinearModel
+    #     return LinearModel
+
+    elif model == "ElasticNet":
         from models.baseline_models import LinearModel
         return LinearModel
 
