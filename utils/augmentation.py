@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
 
-def filter_df(data_path):
-  df = pd.read_csv(data_path, use_absorbance_only)
+def filter_df(data_path, use_absorbance_only):
+  df = pd.read_csv(data_path)
 
   if use_absorbance_only:
       # filter out the df to only use the columns: Patient ID, collection time, BUN, 255nm, 280nm and 310nm
