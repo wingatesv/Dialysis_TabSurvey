@@ -1,10 +1,30 @@
 import pandas as pd
 import numpy as np
 
+def filter_df(data_path):
+  df = pd.read_csv(data_path)
+
+  if args.use_absorbance_only:
+      # filter out the df to only use the columns: Patient ID, collection time, BUN, 255nm, 280nm and 310nm
+      columns_to_use = ['patient ID', 'collection time', args.target_variable, '255nm', '280nm', '310nm']
+      
+  else:
+      columns_to_use = [ 'patient ID', 'collection time', args.target_variable, '255nm', '280nm', '310nm', 
+                        'NMWCO', 'membrane area', 'venous pressure', 'arterial flow velocity',
+                        'hourly dehydration volume', 'target dehydration amount', 'current dehydration volume',
+                        'dialysate ion concentration', 'transmembrane pressure', 'dialysate flow rate',
+                        'duration of dialysate waste', 'ultrafiltration coefficient', 'dialysis day',
+                        'age', 'systolic pressure', 'duration of dialysis', 'height', 'dry body weight']
+
+  df = df[columns_to_use]
+
+  return df
+    
+
 def mixup(patient_ids, data_path, augmentation_params):
     mixup_df = pd.DataFrame()
 
-    data = pd.read_csv(data_path)
+    data = filter_df(data_path)
 
     print('Mixup lambda: ', augmentation_params['mixup_lambda'])
     # For each pair of patient IDs, create mixup data and add it to mixup_df
@@ -50,7 +70,7 @@ def mixup(patient_ids, data_path, augmentation_params):
 
 def cutmix(patient_ids, data_path, augmentation_params):
     cutmix_df = pd.DataFrame()
-    data = pd.read_csv(data_path)
+    data = filter_df(data_path)
 
    
     print('Cutmix lambda: ', augmentation_params['cutmix_lambda'])
@@ -99,7 +119,7 @@ def cutmix(patient_ids, data_path, augmentation_params):
 def add_gaussian_noise(patient_ids, data_path, target_variable, augmentation_params):
 
     noise_df = pd.DataFrame()
-    data = pd.read_csv(data_path)
+    data = filter_df(data_path)
 
     print('Gaussian Noise Level: ', augmentation_params['gaussian_noise_level'])
 
@@ -130,7 +150,7 @@ def add_gaussian_noise(patient_ids, data_path, target_variable, augmentation_par
 
 def add_random_jitter(patient_ids, data_path, target_variable, augmentation_params):
     jitter_df = pd.DataFrame()
-    data = pd.read_csv(data_path)
+    data = filter_df(data_path)
 
     print('Jitter Level: ', augmentation_params['jitter_level'])
 
