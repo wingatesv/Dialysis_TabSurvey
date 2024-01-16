@@ -7,8 +7,8 @@ model_name: DeepGBM # LinearModel, KNN, SVM, DecisionTree, RandomForest, MLP
 objective: regression
 optimize_hyperparameters: True
 
-data_path: /content/Dialysis_TabSurvey/data/df_imputed.csv
-# data_path: /content/Dialysis_TabSurvey/data/df_selected_4.csv
+data_path: /content/Dialysis_TabSurvey/data/df_imputed_all.csv
+
 # GPU parameters
 use_gpu: False
 gpu_ids: [0]
@@ -36,10 +36,12 @@ epochs: 500
 logging_period: 100
 
 # About the data
-num_features: 22 #22, 4
+num_features: 0 # will be set automatically 22 or 4 depending on the use_absorbance_only argument
+use_absorbance_only: False
+target_variable: BUN
 num_classes: 1 # always one for regression!
 
 # Data Augmentation
 regression_aug: True
 
-target_variable: BUN
+
