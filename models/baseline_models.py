@@ -1,9 +1,7 @@
 import random
-
 from sklearn import linear_model, neighbors, svm, tree, ensemble
-from sklearn.linear_model import BayesianRidge
+from sklearn.linear_model import BayesianRidge, ElasticNet
 from sklearn.naive_bayes import GaussianNB
-
 from models.basemodel import BaseModel
 
 '''
@@ -17,21 +15,45 @@ from models.basemodel import BaseModel
     Takes no hyperparameters
 '''
 
+# class LinearModel(BaseModel):
+
+#     def __init__(self, params, args):
+#         super().__init__(params, args)
+
+#         if args.objective == "regression":
+#             if args.model_name =='LassoLinearModel':
+#               self.model = linear_model.Lasso(alpha=params['alpha'])
+
+#             elif args.model_name =='RidgeLinearModel':
+#               self.model = linear_model.Ridge(alpha=params['alpha'])
+
+#             else:
+#               self.model = linear_model.LinearRegression(n_jobs=-1)
+            
+#         elif args.objective == "classification":
+#             self.model = linear_model.LogisticRegression(multi_class="multinomial", n_jobs=-1)
+#         elif args.objective == "binary":
+#             self.model = linear_model.LogisticRegression(n_jobs=-1)
+
+#     @classmethod
+#     def define_trial_parameters(cls, trial, args):
+#         if args.model_name == 'LassoLinearModel' or args.model_name == 'RidgeLinearModel':
+#           params = {
+#             "alpha" : trial.suggest_float("alpha", 0.01, 10.0)
+#           }
+#         else:
+#           params = dict()
+#         return params
+
 
 class LinearModel(BaseModel):
-
     def __init__(self, params, args):
         super().__init__(params, args)
-
         if args.objective == "regression":
-            if args.model_name =='LassoLinearModel':
-              self.model = linear_model.Lasso(alpha=params['alpha'])
-
-            elif args.model_name =='RidgeLinearModel':
-              self.model = linear_model.Ridge(alpha=params['alpha'])
-
+            if args.model_name == 'ElasticNet':
+                self.model = ElasticNet(alpha=params['alpha'], l1_ratio=params['l1_ratio'])
             else:
-              self.model = linear_model.LinearRegression(n_jobs=-1)
+                self.model = linear_model.LinearRegression(n_jobs=-1)
             
         elif args.objective == "classification":
             self.model = linear_model.LogisticRegression(multi_class="multinomial", n_jobs=-1)
@@ -40,13 +62,15 @@ class LinearModel(BaseModel):
 
     @classmethod
     def define_trial_parameters(cls, trial, args):
-        if args.model_name == 'LassoLinearModel' or args.model_name == 'RidgeLinearModel':
-          params = {
-            "alpha" : trial.suggest_float("alpha", 0.01, 10.0)
-          }
+        if args.model_name == 'ElasticNet':
+            params = {
+                "alpha": trial.suggest_float("alpha", 0.01, 10.0),
+                "l1_ratio":  trial.suggest_float("l1_ratio", 0.0, 1.0)
+            }
         else:
-          params = dict()
+            params = dict()
         return params
+
 '''
 For regression tasks, it uses the BayesianRidge model from sklearn, which is a type of Bayesian linear regression.
 
