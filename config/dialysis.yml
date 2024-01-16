@@ -38,7 +38,7 @@ logging_period: 100
 # About the data
 num_features: 0 # will be set automatically 22 or 4 depending on the use_absorbance_only argument
 use_absorbance_only: False
-target_variable: BUN
+target_variable: BUN  # BUN, Creatinine, Uric Acid, Potassium, Phosphorus, b2-M
 num_classes: 1 # always one for regression!
 
 # Data Augmentation
