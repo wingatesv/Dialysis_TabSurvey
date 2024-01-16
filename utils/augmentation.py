@@ -13,7 +13,7 @@ def filter_df(data_path, use_absorbance_only, target_variable):
                         'NMWCO', 'membrane area', 'venous pressure', 'arterial flow velocity',
                         'hourly dehydration volume', 'target dehydration amount', 'current dehydration volume',
                         'dialysate ion concentration', 'transmembrane pressure', 'dialysate flow rate',
-                        'duration of dialysate waste', 'ultrafiltration coefficient', 'dialysis day',
+                        'ultrafiltration coefficient', 'dialysis day',
                         'age', 'systolic pressure', 'duration of dialysis', 'height', 'dry body weight']
 
   df = df[columns_to_use]
