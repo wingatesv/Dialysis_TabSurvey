@@ -35,9 +35,9 @@ def load_data(args):
                             'NMWCO', 'membrane area', 'venous pressure', 'arterial flow velocity',
                             'hourly dehydration volume', 'target dehydration amount', 'current dehydration volume',
                             'dialysate ion concentration', 'transmembrane pressure', 'dialysate flow rate',
-                            'duration of dialysate waste', 'ultrafiltration coefficient', 'dialysis day',
+                            'ultrafiltration coefficient', 'dialysis day',
                             'age', 'systolic pressure', 'duration of dialysis', 'height', 'dry body weight']
-          args.num_features = 22
+          args.num_features = 21
           
       df = df[columns_to_use]
       df.info()
