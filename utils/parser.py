@@ -16,7 +16,7 @@ def get_parser():
                                                                                       "binary"],
                help="Set the type of the task")
 
-    parser.add('--data_path', required=True, type=str, default="/content/drive/MyDrive/NTU Project/df_imputed.csv", help="The data path")
+    parser.add('--data_path', required=True, type=str, default="/content/Dialysis_TabSurvey/data/df_imputed_all.csv", help="The data path")
 
     parser.add('--use_absorbance_only', action="store_true", help="Only use absorbance features only")
     
