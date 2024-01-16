@@ -68,7 +68,7 @@ def mixup(patient_ids, data_path, use_absorbance_only, target_variable, augmenta
 
     return mixup_df
 
-def cutmix(patient_ids, data_path, target_variable, use_absorbance_only, augmentation_params):
+def cutmix(patient_ids, data_path, use_absorbance_only, target_variable, augmentation_params):
     cutmix_df = pd.DataFrame()
     data = filter_df(data_path, use_absorbance_only, target_variable)
 
@@ -116,7 +116,7 @@ def cutmix(patient_ids, data_path, target_variable, use_absorbance_only, augment
 
 
 
-def add_gaussian_noise(patient_ids, data_path, target_variable, use_absorbance_only, augmentation_params):
+def add_gaussian_noise(patient_ids, data_path, use_absorbance_only, target_variable, augmentation_params):
 
     noise_df = pd.DataFrame()
     data = filter_df(data_path, use_absorbance_only, target_variable)
@@ -148,7 +148,7 @@ def add_gaussian_noise(patient_ids, data_path, target_variable, use_absorbance_o
 
 
 
-def add_random_jitter(patient_ids, data_path, target_variable, use_absorbance_only, augmentation_params):
+def add_random_jitter(patient_ids, data_path, use_absorbance_only, target_variable, augmentation_params):
     jitter_df = pd.DataFrame()
     data = filter_df(data_path, use_absorbance_only, target_variable)
 
