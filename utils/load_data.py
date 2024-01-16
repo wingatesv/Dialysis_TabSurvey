@@ -28,11 +28,11 @@ def load_data(args):
 
       if args.use_absorbance_only:
           # filter out the df to only use the columns: Patient ID, collection time, BUN, 255nm, 280nm and 310nm
-          columns_to_use = ['Patient ID', 'collection time', args.target_variable, '255nm', '280nm', '310nm']
+          columns_to_use = ['patient ID', 'collection time', args.target_variable, '255nm', '280nm', '310nm']
           df = df[columns_to_use]
           args.num_features = 4
       else:
-          columns_to_use = [ 'Patient ID', 'collection time', args.target_variable, '255nm', '280nm', '310nm', 
+          columns_to_use = [ 'patient ID', 'collection time', args.target_variable, '255nm', '280nm', '310nm', 
                             'NMWCO', 'membrane area', 'venous pressure', 'arterial flow velocity',
                             'hourly dehydration volume', 'target dehydration amount', 'current dehydration volume',
                             'dialysate ion concentration', 'transmembrane pressure', 'dialysate flow rate',
