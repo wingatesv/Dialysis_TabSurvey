@@ -1,15 +1,15 @@
 import pandas as pd
 import numpy as np
 
-def filter_df(data_path, use_absorbance_only):
+def filter_df(data_path, use_absorbance_only, target_variable):
   df = pd.read_csv(data_path)
 
   if use_absorbance_only:
       # filter out the df to only use the columns: Patient ID, collection time, BUN, 255nm, 280nm and 310nm
-      columns_to_use = ['patient ID', 'collection time', args.target_variable, '255nm', '280nm', '310nm']
+      columns_to_use = ['patient ID', 'collection time', target_variable, '255nm', '280nm', '310nm']
       
   else:
-      columns_to_use = [ 'patient ID', 'collection time', args.target_variable, '255nm', '280nm', '310nm', 
+      columns_to_use = [ 'patient ID', 'collection time', target_variable, '255nm', '280nm', '310nm', 
                         'NMWCO', 'membrane area', 'venous pressure', 'arterial flow velocity',
                         'hourly dehydration volume', 'target dehydration amount', 'current dehydration volume',
                         'dialysate ion concentration', 'transmembrane pressure', 'dialysate flow rate',
@@ -21,10 +21,10 @@ def filter_df(data_path, use_absorbance_only):
   return df
     
 
-def mixup(patient_ids, data_path, use_absorbance_only, augmentation_params):
+def mixup(patient_ids, data_path, use_absorbance_only, target_variable, augmentation_params):
     mixup_df = pd.DataFrame()
 
-    data = filter_df(data_path, use_absorbance_only)
+    data = filter_df(data_path, use_absorbance_only, target_variable)
 
     print('Mixup lambda: ', augmentation_params['mixup_lambda'])
     # For each pair of patient IDs, create mixup data and add it to mixup_df
@@ -68,9 +68,9 @@ def mixup(patient_ids, data_path, use_absorbance_only, augmentation_params):
 
     return mixup_df
 
-def cutmix(patient_ids, data_path, use_absorbance_only, augmentation_params):
+def cutmix(patient_ids, data_path, target_variable, use_absorbance_only, augmentation_params):
     cutmix_df = pd.DataFrame()
-    data = filter_df(data_path, use_absorbance_only)
+    data = filter_df(data_path, use_absorbance_only, target_variable)
 
    
     print('Cutmix lambda: ', augmentation_params['cutmix_lambda'])
@@ -119,7 +119,7 @@ def cutmix(patient_ids, data_path, use_absorbance_only, augmentation_params):
 def add_gaussian_noise(patient_ids, data_path, target_variable, use_absorbance_only, augmentation_params):
 
     noise_df = pd.DataFrame()
-    data = filter_df(data_path, use_absorbance_only)
+    data = filter_df(data_path, use_absorbance_only, target_variable)
 
     print('Gaussian Noise Level: ', augmentation_params['gaussian_noise_level'])
 
@@ -150,7 +150,7 @@ def add_gaussian_noise(patient_ids, data_path, target_variable, use_absorbance_o
 
 def add_random_jitter(patient_ids, data_path, target_variable, use_absorbance_only, augmentation_params):
     jitter_df = pd.DataFrame()
-    data = filter_df(data_path, use_absorbance_only)
+    data = filter_df(data_path, use_absorbance_only, target_variable)
 
     print('Jitter Level: ', augmentation_params['jitter_level'])
 
