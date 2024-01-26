@@ -30,6 +30,16 @@ def load_data(args):
           # filter out the df to only use the columns: Patient ID, collection time, BUN, 255nm, 280nm and 310nm
           columns_to_use = ['patient ID', 'collection time', args.target_variable, '255nm', '280nm', '310nm']
           args.num_features = 4
+
+      elif args.use_personalized_only:
+          columns_to_use = [ 'patient ID', 'collection time', args.target_variable, 
+                            'NMWCO', 'membrane area', 'venous pressure', 'arterial flow velocity',
+                            'hourly dehydration volume', 'target dehydration amount', 'current dehydration volume',
+                            'dialysate ion concentration', 'transmembrane pressure', 'dialysate flow rate',
+                            'ultrafiltration coefficient', 'dialysis day',
+                            'age', 'systolic pressure', 'duration of dialysis', 'height', 'dry body weight']
+          args.num_features = 18
+          
       else:
           columns_to_use = [ 'patient ID', 'collection time', args.target_variable, '255nm', '280nm', '310nm', 
                             'NMWCO', 'membrane area', 'venous pressure', 'arterial flow velocity',
