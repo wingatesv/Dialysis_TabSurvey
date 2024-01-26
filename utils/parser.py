@@ -19,6 +19,8 @@ def get_parser():
     parser.add('--data_path', required=True, type=str, default="/content/Dialysis_TabSurvey/data/df_imputed_all.csv", help="The data path")
 
     parser.add('--use_absorbance_only', action="store_true", help="Only use absorbance features only")
+
+    parser.add('--use_personalized_only', action="store_true", help="Only use personalized features only")
     
     parser.add('--use_gpu', action="store_true", help="Set to true if GPU is available")
     parser.add('--gpu_ids', type=int, action="append", help="IDs of the GPUs used when data_parallel is true")
