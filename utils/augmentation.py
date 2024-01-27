@@ -15,7 +15,6 @@ def filter_df(data_path, use_absorbance_only, use_personalized_only, target_vari
                       'dialysate ion concentration', 'transmembrane pressure', 'dialysate flow rate',
                       'ultrafiltration coefficient', 'dialysis day',
                       'age', 'systolic pressure', 'duration of dialysis', 'height', 'dry body weight']
-    args.num_features = 18
     
   else:
       columns_to_use = [ 'patient ID', 'collection time', target_variable, '255nm', '280nm', '310nm', 
