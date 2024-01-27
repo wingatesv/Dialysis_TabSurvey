@@ -9,7 +9,7 @@ def filter_df(data_path, use_absorbance_only, use_personalized_only, target_vari
       columns_to_use = ['patient ID', 'collection time', target_variable, '255nm', '280nm', '310nm']
 
   elif use_personalized_only:
-    columns_to_use = [ 'patient ID', 'collection time', args.target_variable, 
+    columns_to_use = [ 'patient ID', 'collection time', target_variable, 
                       'NMWCO', 'membrane area', 'venous pressure', 'arterial flow velocity',
                       'hourly dehydration volume', 'target dehydration amount', 'current dehydration volume',
                       'dialysate ion concentration', 'transmembrane pressure', 'dialysate flow rate',
