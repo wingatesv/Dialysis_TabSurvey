@@ -3,6 +3,8 @@ modify the mixup and cutmix so that fixed patient features like weights, age, an
 modify the gaussian noise and random jittering to only augment continuous features only, those discrete features should remain discrete
 if got time, modify the algorithm to that can check these condition automatically before augmenting
 
+mixup is wrongly implemented, should be taking the average of the cutout patient data
+
 novelty and contribution: DL results, propose novel augmentation framework for this dataset
 '''
 import pandas as pd
