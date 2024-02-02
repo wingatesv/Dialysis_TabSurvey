@@ -36,6 +36,10 @@ def filter_df(data_path, use_absorbance_only, use_personalized_only, target_vari
   df = df[columns_to_use]
 
   return df
+
+def filter_continuous_columns(data):
+    continuous_columns = data.select_dtypes(include=['float64', 'int64']).columns
+    return data[continuous_columns]
     
 def identify_fixed_columns(data):
     # Set a threshold for considering a column as fixed
