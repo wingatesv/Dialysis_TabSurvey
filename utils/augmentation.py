@@ -37,7 +37,21 @@ def filter_df(data_path, use_absorbance_only, use_personalized_only, target_vari
 
   return df
     
+def identify_fixed_columns(data):
+    # Set a threshold for considering a column as fixed
+    fixed_threshold = 0.99
 
+    fixed_columns = []
+    for column in data.columns:
+        unique_values = data[column].nunique()
+        total_values = data[column].count()
+
+        # Check if a column has a high percentage of the same value (above the threshold)
+        if unique_values / total_values < fixed_threshold:
+            fixed_columns.append(column)
+
+    return fixed_columns
+  
 def mixup(patient_ids, data_path, use_absorbance_only, use_personalized_only, target_variable, augmentation_params):
     mixup_df = pd.DataFrame()
 
