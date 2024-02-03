@@ -141,6 +141,65 @@ def mixup(patient_ids, data_path, use_absorbance_only, use_personalized_only, ta
 
 #     return mixup_df
 
+# def mixup(patient_ids, data_path, use_absorbance_only, use_personalized_only, target_variable, augmentation_params):
+#     mixup_df = pd.DataFrame()
+#     data = filter_df(data_path, use_absorbance_only, use_personalized_only, target_variable)
+
+#     print('Mixup lambda: ', augmentation_params['mixup_lambda'])
+
+#     # Identify columns with fixed values
+#     fixed_columns  = [ 'NMWCO', 'membrane area', 
+#                         'hourly dehydration volume', 'target dehydration amount', 
+#                         'dialysate ion concentration',  'dialysate flow rate',
+#                         'ultrafiltration coefficient', 'dialysis day',
+#                         'age', 'systolic pressure', 'duration of dialysis', 'height', 'dry body weight']
+
+#     print('Fixed columns: ',fixed_columns)
+
+#     for i in range(0, len(patient_ids), 2):
+#         if i + 1 >= len(patient_ids):
+#             break
+            
+#         patient_id1 = patient_ids[i]
+#         patient_id2 = patient_ids[i + 1]
+
+#         patient_data1 = data[data['patient ID'] == patient_id1].copy()
+#         patient_data2 = data[data['patient ID'] == patient_id2].copy()
+
+#         # Exclude fixed columns from mixup
+#         patient_data1 = patient_data1.drop(columns=fixed_columns)
+#         patient_data2 = patient_data2.drop(columns=fixed_columns)
+
+#         print(patient_data1)
+#         print(patient_data2)
+
+#         # Determine the number of data points from patient1 and patient2 based on mixup_lambda
+#         num_data_points1 = int(len(patient_data1) * augmentation_params['mixup_lambda'])
+#         num_data_points2 = len(patient_data2) - num_data_points1
+
+#         # Select the data points from patient1 and patient2
+#         patient_data1_mixup = patient_data1.iloc[:num_data_points1]
+#         patient_data2_mixup = patient_data2.iloc[-num_data_points2:]
+
+#         # Blend the selected data points using the mean
+#         blended_data = (patient_data1_mixup.iloc[:, 1:] + patient_data2_mixup.iloc[:, 1:]) / 2  # Assuming columns 1 onwards are features
+
+#         # Concatenate the blended data with the remaining data from patient1 and patient2
+#         mixup_data = pd.concat([blended_data, patient_data1.iloc[num_data_points1:], patient_data2.iloc[:-num_data_points2]])
+
+#         # Generate a new patient ID for the mixup data
+#         new_patient_id = 'mixup_' + str(np.random.randint(1e6))
+#         mixup_data['patient ID'] = new_patient_id
+
+#         print('New Data:')
+#         print(mixup_data)
+
+#         break
+
+#         mixup_df = pd.concat([mixup_df, mixup_data])
+
+#     return mixup_df
+
 def cutmix(patient_ids, data_path, use_absorbance_only, use_personalized_only, target_variable, augmentation_params):
     cutmix_df = pd.DataFrame()
     data = filter_df(data_path, use_absorbance_only, use_personalized_only, target_variable)
