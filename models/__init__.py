@@ -1,6 +1,6 @@
-all_models = ["LinearModel", "KNN", "DecisionTree", "RandomForest", "XGBoost", "CatBoost", "LightGBM", "ModelTree",
+all_models = ["LinearModel", "ElasticNet", "BayesianModel", "SVM", "KNN", "DecisionTree", "RandomForest", "XGBoost", "CatBoost", "LightGBM", "ModelTree",
                "MLP", "TabNet", "VIME", "TabTransformer", "NODE", "DeepGBM", "RLN", "DNFNet", "STG", "NAM", "DeepFM",
-               "SAINT", "DANet"]
+               "SAINT", "DANet", "RNN", "LSTM", "DeepARIMA"]
 
 
 def str2model(model):
@@ -8,14 +8,6 @@ def str2model(model):
     if model == "LinearModel":
         from models.baseline_models import LinearModel
         return LinearModel
-
-    # elif model == "LassoLinearModel":
-    #     from models.baseline_models import LinearModel
-    #     return LinearModel
-    
-    # elif model == "RidgeLinearModel":
-    #     from models.baseline_models import LinearModel
-    #     return LinearModel
 
     elif model == "ElasticNet":
         from models.baseline_models import LinearModel
@@ -108,6 +100,18 @@ def str2model(model):
     elif model == "DANet":
         from models.danet import DANet
         return DANet
+
+    elif model == "RNN":
+        from models.rnn import RNN
+        return RNN
+      
+    elif model == "LSTM":
+        from models.lstm import LSTM
+        return LSTM
+
+    elif model == "DeepARIMA":
+        from models.deepARIMA import DeepARIMA
+        return DeepARIMA
 
     else:
         raise NotImplementedError("Model \"" + model + "\" not yet implemented")
