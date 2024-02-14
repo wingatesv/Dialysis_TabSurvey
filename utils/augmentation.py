@@ -56,7 +56,7 @@ def identify_fixed_columns(data):
 
     return fixed_columns
   
-def mixup(patient_ids, data_path, use_absorbance_only, use_personalized_only, target_variable, augmentation_params):
+def mixup_old(patient_ids, data_path, use_absorbance_only, use_personalized_only, target_variable, augmentation_params):
     mixup_df = pd.DataFrame()
 
     data = filter_df(data_path, use_absorbance_only, use_personalized_only, target_variable)
@@ -103,102 +103,75 @@ def mixup(patient_ids, data_path, use_absorbance_only, use_personalized_only, ta
 
     return mixup_df
 
-# def mixup(patient_ids, data_path, use_absorbance_only, use_personalized_only, target_variable, augmentation_params):
-#     mixup_df = pd.DataFrame()
-#     data = filter_df(data_path, use_absorbance_only, use_personalized_only, target_variable)
+def generate_mixup_data(patient_data1, patient_data2, augmentation_params, target_variable):
 
-#     print('Mixup lambda: ', augmentation_params['mixup_lambda'])
+    # Determine the number of data points from patient1 and patient2 based on lmbda_fraction
+    num_data_points1 = int(len(patient_data1) * augmentation_params['mixup_lambda'])
+    num_data_points2 = len(patient_data1) - num_data_points1
+    # Select the data points from patient1 and patient2
+    patient_data1_mixup1 = patient_data1.iloc[:num_data_points1]
+    patient_data1_mixup2 = patient_data1.iloc[-num_data_points2:]
+    patient_data2_mixup = patient_data2.iloc[-num_data_points2:]
 
-#     for i in range(0, len(patient_ids), 2):
-#         if i + 1 >= len(patient_ids):
-#             break
+    # Reset the index for patient_data1_mixup2
+    patient_data1_mixup2 = patient_data1_mixup2.reset_index(drop=True)
+
+    # Mixup the data points from patient1 and patient2
+    mixup_data = pd.DataFrame()
+
+    # Select the numeric columns to average
+    numeric_columns = ['collection time', target_variable, '255nm', '280nm', '310nm', 
+                        'venous pressure', 'arterial flow velocity',
+                        'current dehydration volume',
+                        'transmembrane pressure']
+
+    # Calculate the average for each numeric column
+    mixup_data[numeric_columns] = (patient_data1_mixup2[numeric_columns].values + patient_data2_mixup[numeric_columns].values) / 2
+
+    # Fill NaN values in mixup_data with corresponding values from patient_data1_mixup2
+    mixup_data = mixup_data.fillna(patient_data1_mixup2)
+
+    mixup_data = pd.concat([patient_data1_mixup1, mixup_data], axis=0)
+
+    # Fill NaN values in mixup_data with corresponding values from patient_data1
+    mixup_data = mixup_data.fillna(patient_data1.reset_index(drop=True))
+
+    mixup_data = mixup_data.reset_index(drop=True)
+
+    # Generate a new patient ID for the mixup data
+    new_patient_id = 'mixup_' + str(np.random.randint(1e6))
+    mixup_data['patient ID'] = new_patient_id
+
+    return mixup_data
+
+def mixup(patient_ids, data_path, use_absorbance_only, use_personalized_only, target_variable, augmentation_params):
+    mixup_df = pd.DataFrame()
+
+    data = filter_df(data_path, use_absorbance_only, use_personalized_only, target_variable)
+
+    print('Mixup lambda: ', augmentation_params['mixup_lambda'])
+    # For each pair of patient IDs, create mixup data and add it to mixup_df
+    for i in range(0, len(patient_ids), 2):
+        if i + 1 >= len(patient_ids):
+            break
             
-#         patient_id1 = patient_ids[i]
-#         patient_id2 = patient_ids[i+1]
+        patient_id1 = patient_ids[i]
+        patient_id2 = patient_ids[i+1]
 
-#         patient_data1 = data[data['patient ID'] == patient_id1].copy()
-#         patient_data2 = data[data['patient ID'] == patient_id2].copy()
+        patient_data1 = data[data['patient ID'] == patient_id1].copy()
+        patient_data2 = data[data['patient ID'] == patient_id2].copy()
 
-#         # Determine the number of data points from patient1 and patient2 based on lambda_fraction
-#         num_data_points1 = int(len(patient_data1) * augmentation_params['mixup_lambda'])
-#         num_data_points2 = len(patient_data1) - num_data_points1
+        mixup_data_1 = generate_mixup_data(patient_data1, patient_data2, augmentation_params, target_variable)
 
-#         # Select the data points from patient1 and patient2
-#         patient_data1_mixup = patient_data1.iloc[:num_data_points1]
-#         patient_data2_mixup = patient_data2.iloc[-num_data_points2:]
+        mixup_data_2 = generate_mixup_data(patient_data2, patient_data1, augmentation_params, target_variable)
 
-#         # Blend the selected data points using the mean
-#         blended_data = (patient_data1_mixup + patient_data2_mixup) / 2
 
-#         # Concatenate the blended data with the remaining data from patient1 and patient2
-#         mixup_data = pd.concat([blended_data, patient_data1.iloc[num_data_points1:], patient_data2.iloc[:-num_data_points2]])
+        mixup_df = pd.concat([mixup_df, mixup_data_1, mixup_data_2])
 
-#         # Generate a new patient ID for the mixup data
-#         new_patient_id = 'mixup_' + str(np.random.randint(1e6))
-#         mixup_data['patient ID'] = new_patient_id
 
-#         mixup_df = pd.concat([mixup_df, mixup_data])
+    return mixup_df
 
-#     return mixup_df
 
-# def mixup(patient_ids, data_path, use_absorbance_only, use_personalized_only, target_variable, augmentation_params):
-#     mixup_df = pd.DataFrame()
-#     data = filter_df(data_path, use_absorbance_only, use_personalized_only, target_variable)
-
-#     print('Mixup lambda: ', augmentation_params['mixup_lambda'])
-
-#     # Identify columns with fixed values
-#     fixed_columns  = [ 'NMWCO', 'membrane area', 
-#                         'hourly dehydration volume', 'target dehydration amount', 
-#                         'dialysate ion concentration',  'dialysate flow rate',
-#                         'ultrafiltration coefficient', 'dialysis day',
-#                         'age', 'systolic pressure', 'duration of dialysis', 'height', 'dry body weight']
-
-#     print('Fixed columns: ',fixed_columns)
-
-#     for i in range(0, len(patient_ids), 2):
-#         if i + 1 >= len(patient_ids):
-#             break
-            
-#         patient_id1 = patient_ids[i]
-#         patient_id2 = patient_ids[i + 1]
-
-#         patient_data1 = data[data['patient ID'] == patient_id1].copy()
-#         patient_data2 = data[data['patient ID'] == patient_id2].copy()
-
-#         # Exclude fixed columns from mixup
-#         patient_data1 = patient_data1.drop(columns=fixed_columns)
-#         patient_data2 = patient_data2.drop(columns=fixed_columns)
-
-#         print(patient_data1)
-#         print(patient_data2)
-
-#         # Determine the number of data points from patient1 and patient2 based on mixup_lambda
-#         num_data_points1 = int(len(patient_data1) * augmentation_params['mixup_lambda'])
-#         num_data_points2 = len(patient_data2) - num_data_points1
-
-#         # Select the data points from patient1 and patient2
-#         patient_data1_mixup = patient_data1.iloc[:num_data_points1]
-#         patient_data2_mixup = patient_data2.iloc[-num_data_points2:]
-
-#         # Blend the selected data points using the mean
-#         blended_data = (patient_data1_mixup.iloc[:, 1:] + patient_data2_mixup.iloc[:, 1:]) / 2  # Assuming columns 1 onwards are features
-
-#         # Concatenate the blended data with the remaining data from patient1 and patient2
-#         mixup_data = pd.concat([blended_data, patient_data1.iloc[num_data_points1:], patient_data2.iloc[:-num_data_points2]])
-
-#         # Generate a new patient ID for the mixup data
-#         new_patient_id = 'mixup_' + str(np.random.randint(1e6))
-#         mixup_data['patient ID'] = new_patient_id
-
-#         print('New Data:')
-#         print(mixup_data)
-
-#         break
-
-#         mixup_df = pd.concat([mixup_df, mixup_data])
-
-#     return mixup_df
 
 def cutmix(patient_ids, data_path, use_absorbance_only, use_personalized_only, target_variable, augmentation_params):
     cutmix_df = pd.DataFrame()
