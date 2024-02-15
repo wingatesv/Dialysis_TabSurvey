@@ -3,7 +3,6 @@ modify the mixup and cutmix so that fixed patient features like weights, age, an
 modify the gaussian noise and random jittering to only augment continuous features only, those discrete features should remain discrete
 if got time, modify the algorithm to that can check these condition automatically before augmenting
 
-mixup is wrongly implemented, should be taking the average of the cutout patient data
 
 novelty and contribution: DL results, propose novel augmentation framework for this dataset
 '''
@@ -293,7 +292,7 @@ def add_gaussian_noise(patient_ids, data_path, use_absorbance_only, use_personal
 
         # Only apply Gaussian noise to selected columns
 
-        excluded_columns = [target_variable, 'patient ID', 'collection time']
+        excluded_columns = [target_variable, 'patient ID', 'collection time', 'MNWCO']
         noise_columns = [col for col in data.columns if col not in excluded_columns]
 
 
@@ -311,36 +310,6 @@ def add_gaussian_noise(patient_ids, data_path, use_absorbance_only, use_personal
     return noise_df
 
 
-# def add_gaussian_noise(patient_ids, data_path, use_absorbance_only, use_personalized_only, target_variable, augmentation_params):
-
-#     noise_df = pd.DataFrame()
-#     data = filter_df(data_path, use_absorbance_only, use_personalized_only, target_variable)
-
-#     print('Gaussian Noise Level: ', augmentation_params['gaussian_noise_level'])
-
-#     # Filter only continuous columns
-#     continuous_data = filter_continuous_columns(data)
-
-#     # For each patient ID, create noise data and add it to noise_df
-#     for patient_id in patient_ids:
-#         patient_data = continuous_data[continuous_data['patient ID'] == patient_id].copy()
-
-#         # Only apply Gaussian noise to selected columns
-#         excluded_columns = [target_variable, 'patient ID', 'collection time']
-#         noise_columns = [col for col in patient_data.columns if col not in excluded_columns]
-
-#         # Add Gaussian noise to each value in the selected columns
-#         for column in noise_columns:
-#             noise = np.random.normal(0, augmentation_params['gaussian_noise_level'], size=patient_data[column].shape)
-#             patient_data[column] += noise
-
-#         # Generate a new patient ID for the noisy data
-#         new_patient_id = 'noise_' + str(np.random.randint(1e6))
-#         patient_data['patient ID'] = new_patient_id
-
-#         noise_df = pd.concat([noise_df, patient_data])
-
-#     return noise_df
   
 def add_random_jitter(patient_ids, data_path, use_absorbance_only, use_personalized_only, target_variable, augmentation_params):
     jitter_df = pd.DataFrame()
@@ -353,7 +322,7 @@ def add_random_jitter(patient_ids, data_path, use_absorbance_only, use_personali
         patient_data = data[data['patient ID'] == patient_id].copy()
 
         # Only apply random jitter to selected columns
-        excluded_columns = [target_variable, 'patient ID', 'collection time']
+        excluded_columns = [target_variable, 'patient ID', 'collection time', 'MNWCO']
         jitter_columns = [col for col in data.columns if col not in excluded_columns]
 
         # Add random jitter to each value in the selected columns
@@ -370,33 +339,5 @@ def add_random_jitter(patient_ids, data_path, use_absorbance_only, use_personali
     return jitter_df
 
 
-# def add_random_jitter(patient_ids, data_path, use_absorbance_only, use_personalized_only, target_variable, augmentation_params):
-#     jitter_df = pd.DataFrame()
-#     data = filter_df(data_path, use_absorbance_only, use_personalized_only, target_variable)
 
-#     print('Jitter Level: ', augmentation_params['jitter_level'])
-
-#     # Filter only continuous columns
-#     continuous_data = filter_continuous_columns(data)
-
-#     # For each patient ID, create jitter data and add it to jitter_df
-#     for patient_id in patient_ids:
-#         patient_data = continuous_data[continuous_data['patient ID'] == patient_id].copy()
-
-#         # Only apply random jitter to selected columns
-#         excluded_columns = [target_variable, 'patient ID', 'collection time']
-#         jitter_columns = [col for col in patient_data.columns if col not in excluded_columns]
-
-#         # Add random jitter to each value in the selected columns
-#         for column in jitter_columns:
-#             jitter = np.random.uniform(-augmentation_params['jitter_level'], augmentation_params['jitter_level'], size=patient_data[column].shape)
-#             patient_data[column] += jitter
-
-#         # Generate a new patient ID for the jitter data
-#         new_patient_id = 'jitter_' + str(np.random.randint(1e6))
-#         patient_data['patient ID'] = new_patient_id
-
-#         jitter_df = pd.concat([jitter_df, patient_data])
-
-#     return jitter_df
 
