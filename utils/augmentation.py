@@ -62,7 +62,7 @@ def cutmix(patient_ids, data_path, use_absorbance_only, use_personalized_only, t
 
         # Determine the number of data points from patient1 and patient2 based on lmbda_fraction
         # num_data_points1 = int(len(patient_data1) * augmentation_params['mixup_lambda'])
-        num_data_points1 = int(len(patient_data1) * 0.5)
+        num_data_points1 = int(len(patient_data1) * augmentation_params['cutmix_lambda'])
         num_data_points2 = len(patient_data1) - num_data_points1
 
         # Select the data points from patient1 and patient2
