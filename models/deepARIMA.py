@@ -15,7 +15,8 @@ class DeepARIMA(BaseModelTorch):
         super().__init__(params, args)
 
         self.arima_order = (params["p"], params["d"], params["q"])
-        self.nn_model = ARIMA_NN_Model(input_dim=self.args.num_features,
+        self.nn_model = ARIMA_NN_Model( n_layers=self.params["n_layers"],
+                                       input_dim=self.args.num_features,      
                                        hidden_dim=params["hidden_dim"],
                                        output_dim=self.args.num_classes,
                                        task=self.args.objective)
@@ -56,46 +57,43 @@ class DeepARIMA(BaseModelTorch):
             "d": trial.suggest_int("d", 0, 2),  # I order
             "q": trial.suggest_int("q", 0, 5),  # MA order
             "hidden_dim": trial.suggest_int("hidden_dim", 10, 100),
+            "n_layers": trial.suggest_int("n_layers", 2, 5),
+            "learning_rate": trial.suggest_float("learning_rate", 0.0005, 0.001)
+        }
+        return params
+
+class MLP(BaseModelTorch):
+
+    def __init__(self, params, args):
+        super().__init__(params, args)
+
+        self.model = MLP_Model(n_layers=self.params["n_layers"], input_dim=self.args.num_features,
+                               hidden_dim=self.params["hidden_dim"], output_dim=self.args.num_classes,
+                               task=self.args.objective)
+
+        self.to_device()
+
+    def fit(self, X, y, X_val=None, y_val=None):
+        X = np.array(X, dtype=np.float)
+        X_val = np.array(X_val, dtype=np.float)
+
+        return super().fit(X, y, X_val, y_val)
+
+    def predict_helper(self, X):
+        X = np.array(X, dtype=np.float)
+        return super().predict_helper(X)
+
+    @classmethod
+    def define_trial_parameters(cls, trial, args):
+        params = {
+            "hidden_dim": trial.suggest_int("hidden_dim", 10, 100),
+            "n_layers": trial.suggest_int("n_layers", 2, 5),
             "learning_rate": trial.suggest_float("learning_rate", 0.0005, 0.001)
         }
         return params
 
 
-
 class ARIMA_NN_Model(nn.Module):
-
-    def __init__(self, input_dim, hidden_dim, output_dim, task):
-        super(ARIMA_NN_Model, self).__init__()
-
-        self.task = task
-
-        # Define a simple MLP architecture
-        self.fc1 = nn.Linear(input_dim, hidden_dim)
-        self.fc2 = nn.Linear(hidden_dim, output_dim)
-
-    def forward(self, x):
-        x = F.relu(self.fc1(x))
-        x = self.fc2(x)
-
-        if self.task == "classification":
-            x = F.softmax(x, dim=1)
-
-        return x
-
-    def predict(self, X):
-        # Convert X to a torch tensor
-        X_tensor = torch.tensor(X).float()
-
-        # Forward pass through the neural network
-        predictions = self.forward(X_tensor)
-
-        # Convert predictions to a numpy array
-        predictions_np = predictions.detach().cpu().numpy()
-
-        return predictions_np
-
-
-class MLP_Model(nn.Module):
 
     def __init__(self, n_layers, input_dim, hidden_dim, output_dim, task):
         super().__init__()
