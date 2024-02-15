@@ -37,24 +37,83 @@ def filter_df(data_path, use_absorbance_only, use_personalized_only, target_vari
 
   return df
 
-def filter_continuous_columns(data):
-    continuous_columns = data.select_dtypes(include=['float64', 'int64']).columns
-    return data[continuous_columns]
-    
-def identify_fixed_columns(data):
-    # Set a threshold for considering a column as fixed
-    fixed_threshold = 0.99
+def cutmix(patient_ids, data_path, use_absorbance_only, use_personalized_only, target_variable, augmentation_params):
+    cutmix_df = pd.DataFrame()
 
-    fixed_columns = []
-    for column in data.columns:
-        unique_values = data[column].nunique()
-        total_values = data[column].count()
+    # Select the numeric columns
+    numeric_columns = ['collection time', target_variable, '255nm', '280nm', '310nm', 
+                  'venous pressure', 'arterial flow velocity',
+                  'current dehydration volume',
+                  'transmembrane pressure']
 
-        # Check if a column has a high percentage of the same value (above the threshold)
-        if unique_values / total_values < fixed_threshold:
-            fixed_columns.append(column)
+    data = filter_df(data_path, use_absorbance_only, use_personalized_only, target_variable)
 
-    return fixed_columns
+    print('Cutmix lambda: ', augmentation_params['cutmix_lambda'])
+    # For each pair of patient IDs, create cutmix data and add it to cutmix_df
+    for i in range(0, len(patient_ids), 2):
+        if i + 1 >= len(patient_ids):
+            break
+            
+        patient_id1 = patient_ids[i]
+        patient_id2 = patient_ids[i+1]
+
+        patient_data1 = data[data['patient ID'] == patient_id1].copy()
+        patient_data2 = data[data['patient ID'] == patient_id2].copy()
+
+        # Determine the number of data points from patient1 and patient2 based on lmbda_fraction
+        # num_data_points1 = int(len(patient_data1) * augmentation_params['mixup_lambda'])
+        num_data_points1 = int(len(patient_data1) * 0.5)
+        num_data_points2 = len(patient_data1) - num_data_points1
+
+        # Select the data points from patient1 and patient2
+        patient_data1_cutmix = patient_data1.iloc[:num_data_points1]
+        patient_data2_cutmix = patient_data2.iloc[-num_data_points2:]
+
+
+        # Reset the index of the selected data
+        patient_data1_cutmix = patient_data1_cutmix.reset_index(drop=True)
+        patient_data2_cutmix = patient_data2_cutmix.reset_index(drop=True)
+
+        # Mixup the data points from patient1 and patient2
+        cutmix_data = pd.DataFrame()
+
+        # Concatenate the selected data points to create the mixup data
+        cutmix_data = pd.concat([patient_data1_cutmix, patient_data2_cutmix[numeric_columns]], axis=0)
+
+        cutmix_data = cutmix_data.reset_index(drop=True)
+        # Fill NaN values in cutmix_data with corresponding values from patient_data1
+        cutmix_data = cutmix_data.fillna(patient_data1.reset_index(drop=True))
+
+        # Generate a new patient ID for the cutmix data
+        new_patient_id = 'cutmix_' + str(np.random.randint(1e6))  # This generates a random integer between 0 and 1e6
+        cutmix_data['patient ID'] = new_patient_id
+
+        cutmix_df = pd.concat([cutmix_df, cutmix_data])
+
+        # Now do the reverse: take the first part of patient2's data and concatenate it with the second part of patient1's data
+        patient_data1_cutmix = patient_data1.iloc[num_data_points1:]
+        patient_data2_cutmix = patient_data2.iloc[:-num_data_points2]
+
+        # Reset the index of the selected data
+        patient_data1_cutmix = patient_data1_cutmix.reset_index(drop=True)
+        patient_data2_cutmix = patient_data2_cutmix.reset_index(drop=True)
+
+        # Mixup the data points from patient1 and patient2
+        cutmix_data2 = pd.DataFrame()
+
+        # Concatenate the selected data points to create the mixup data
+        cutmix_data2 = pd.concat([patient_data2_cutmix, patient_data1_cutmix[numeric_columns]], axis=0)
+
+        cutmix_data2 = cutmix_data2.reset_index(drop=True)
+        # Fill NaN values in cutmix_data with corresponding values from patient_data1
+        cutmix_data2 = cutmix_data2.fillna(patient_data2.reset_index(drop=True))
+
+        new_patient_id2 = 'cutmix_' + str(np.random.randint(1e6))
+        cutmix_data2['patient ID'] = new_patient_id2
+
+        cutmix_df = pd.concat([cutmix_df, cutmix_data2])
+
+    return cutmix_df
   
 def mixup_old(patient_ids, data_path, use_absorbance_only, use_personalized_only, target_variable, augmentation_params):
     mixup_df = pd.DataFrame()
@@ -173,7 +232,7 @@ def mixup(patient_ids, data_path, use_absorbance_only, use_personalized_only, ta
 
 
 
-def cutmix(patient_ids, data_path, use_absorbance_only, use_personalized_only, target_variable, augmentation_params):
+def cutmix_old(patient_ids, data_path, use_absorbance_only, use_personalized_only, target_variable, augmentation_params):
     cutmix_df = pd.DataFrame()
     data = filter_df(data_path, use_absorbance_only, use_personalized_only, target_variable)
 
