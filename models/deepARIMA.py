@@ -93,3 +93,37 @@ class ARIMA_NN_Model(nn.Module):
         predictions_np = predictions.detach().cpu().numpy()
 
         return predictions_np
+
+
+class MLP_Model(nn.Module):
+
+    def __init__(self, n_layers, input_dim, hidden_dim, output_dim, task):
+        super().__init__()
+
+        self.task = task
+
+        self.layers = nn.ModuleList()
+
+        # Input Layer (= first hidden layer)
+        self.input_layer = nn.Linear(input_dim, hidden_dim)
+
+        # Hidden Layers (number specified by n_layers)
+        self.layers.extend([nn.Linear(hidden_dim, hidden_dim) for _ in range(n_layers - 1)])
+
+        # Output Layer
+        self.output_layer = nn.Linear(hidden_dim, output_dim)
+
+    def forward(self, x):
+        x = F.relu(self.input_layer(x))
+
+        # Use ReLU as activation for all hidden layers
+        for layer in self.layers:
+            x = F.relu(layer(x))
+
+        # No activation function on the output
+        x = self.output_layer(x)
+
+        if self.task == "classification":
+            x = F.softmax(x, dim=1)
+
+        return x
