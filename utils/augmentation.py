@@ -282,7 +282,7 @@ def add_random_jitter_extreme(patient_ids, data_path, use_absorbance_only, use_p
     jitter_df = pd.DataFrame()
     data = filter_df(data_path, use_absorbance_only, use_personalized_only, target_variable)
 
-    print('Jitter Level: ', augmentation_params['jitter_level']*augmentation_params['extreme_factor'])
+    print('Extreme Jitter Level: ', augmentation_params['jitter_level']*augmentation_params['extreme_factor'])
 
     # For each patient ID, create jitter data and add it to jitter_df
     for patient_id in patient_ids:
@@ -301,10 +301,6 @@ def add_random_jitter_extreme(patient_ids, data_path, use_absorbance_only, use_p
                              'dialysate ion concentration', 'ultrafiltration coefficient', 
                              'age', 'systolic pressure']
 
-        # continuous_columns = ['255nm', '280nm', '310nm', 
-        #                       'venous pressure', 'arterial flow velocity',
-        #                       'current dehydration volume',
-        #                       'transmembrane pressure']
 
         # Generate a single set of random jitter values for each fixed column
         jitter_values = {
@@ -321,14 +317,6 @@ def add_random_jitter_extreme(patient_ids, data_path, use_absorbance_only, use_p
 
             # Ensure non-negative values
             patient_data[col] = np.clip(patient_data[col], a_min=0.00001, a_max=None)
-
-
-        # Apply random jitter to continuous columns independently for each row
-        # for column in continuous_columns:
-        #     jitter = np.random.uniform(-augmentation_params['jitter_level']*augmentation_params['extreme_factor'], augmentation_params['jitter_level']*augmentation_params['extreme_factor'], size=patient_data[column].shape)
-        #     patient_data[column] += jitter
-
-        #     patient_data[column] = np.clip(patient_data[column], a_min=0.00001, a_max=None)
 
 
         # Generate a new patient ID for the jitter data
