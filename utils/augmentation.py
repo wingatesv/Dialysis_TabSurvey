@@ -191,10 +191,11 @@ def generate_mixup_data(patient_data1, patient_data2, augmentation_params, targe
 
     mixup_data = pd.concat([patient_data1_mixup1, mixup_data], axis=0)
 
+    mixup_data = mixup_data.reset_index(drop=True)
+
     # Fill NaN values in mixup_data with corresponding values from patient_data1
     mixup_data = mixup_data.fillna(patient_data1.reset_index(drop=True))
 
-    mixup_data = mixup_data.reset_index(drop=True)
 
     # Generate a new patient ID for the mixup data
     new_patient_id = 'mixup_' + str(np.random.randint(1e6))
