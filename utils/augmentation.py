@@ -203,6 +203,7 @@ def generate_mixup_data(patient_data1, patient_data2, augmentation_params, targe
 
     return mixup_data
 
+
 def mixup(patient_ids, data_path, use_absorbance_only, use_personalized_only, target_variable, augmentation_params):
     mixup_df = pd.DataFrame()
 
@@ -277,41 +278,69 @@ def cutmix_old(patient_ids, data_path, use_absorbance_only, use_personalized_onl
     return cutmix_df
 
 
-
-
-
-def add_gaussian_noise(patient_ids, data_path, use_absorbance_only, use_personalized_only, target_variable, augmentation_params):
-
-    noise_df = pd.DataFrame()
+def add_random_jitter_extreme(patient_ids, data_path, use_absorbance_only, use_personalized_only, target_variable, augmentation_params):
+    jitter_df = pd.DataFrame()
     data = filter_df(data_path, use_absorbance_only, use_personalized_only, target_variable)
 
-    print('Gaussian Noise Level: ', augmentation_params['gaussian_noise_level'])
+    print('Jitter Level: ', augmentation_params['jitter_level']*augmentation_params['extreme_factor'])
 
-    # For each patient ID, create noise data and add it to noise_df
+    # For each patient ID, create jitter data and add it to jitter_df
     for patient_id in patient_ids:
         patient_data = data[data['patient ID'] == patient_id].copy()
 
-        # Only apply Gaussian noise to selected columns
+        # Only apply random jitter to selected columns
+        fixed_columns = ['NMWCO', 'membrane area', 'target dehydration amount', 
+                        'dialysate ion concentration', 'ultrafiltration coefficient', 
+                        'age', 'systolic pressure', 'duration of dialysis', 
+                        'height', 'dry body weight', '255nm', '280nm', '310nm', 
+                              'venous pressure', 'arterial flow velocity',
+                              'current dehydration volume',
+                              'transmembrane pressure']
 
-        excluded_columns = [target_variable, 'patient ID', 'collection time', 'MNWCO']
-        noise_columns = [col for col in data.columns if col not in excluded_columns]
+        round_off_columns = ['NMWCO', 'target dehydration amount', 
+                             'dialysate ion concentration', 'ultrafiltration coefficient', 
+                             'age', 'systolic pressure']
+
+        # continuous_columns = ['255nm', '280nm', '310nm', 
+        #                       'venous pressure', 'arterial flow velocity',
+        #                       'current dehydration volume',
+        #                       'transmembrane pressure']
+
+        # Generate a single set of random jitter values for each fixed column
+        jitter_values = {
+            col: np.random.uniform(-augmentation_params['jitter_level']*augmentation_params['extreme_factor'], augmentation_params['jitter_level']*augmentation_params['extreme_factor'])
+            for col in fixed_columns
+        }
+
+        # Apply jitter values to fixed columns consistently across all rows
+        for col, jitter in jitter_values.items():
+            patient_data[col] += jitter
+            # Round off to whole values for specified columns
+            if col in round_off_columns:
+                patient_data[col] = np.round(patient_data[col])
+
+            # Ensure non-negative values
+            patient_data[col] = np.clip(patient_data[col], a_min=0.00001, a_max=None)
 
 
-        # Add Gaussian noise to each value in the selected columns
-        for column in noise_columns:
-            noise = np.random.normal(0, augmentation_params['gaussian_noise_level'], size=patient_data[column].shape)
-            patient_data[column] += noise
+        # Apply random jitter to continuous columns independently for each row
+        # for column in continuous_columns:
+        #     jitter = np.random.uniform(-augmentation_params['jitter_level']*augmentation_params['extreme_factor'], augmentation_params['jitter_level']*augmentation_params['extreme_factor'], size=patient_data[column].shape)
+        #     patient_data[column] += jitter
 
-        # Generate a new patient ID for the noisy data
-        new_patient_id = 'noise_' + str(np.random.randint(1e6))  # This generates a random integer between 0 and 1e6
+        #     patient_data[column] = np.clip(patient_data[column], a_min=0.00001, a_max=None)
+
+
+        # Generate a new patient ID for the jitter data
+        new_patient_id = 'jitter_ext_' + str(np.random.randint(1e6))
         patient_data['patient ID'] = new_patient_id
 
-        noise_df = pd.concat([noise_df, patient_data])
+        jitter_df = pd.concat([jitter_df, patient_data])
 
-    return noise_df
+    return jitter_df
 
 
-  
+
 def add_random_jitter(patient_ids, data_path, use_absorbance_only, use_personalized_only, target_variable, augmentation_params):
     jitter_df = pd.DataFrame()
     data = filter_df(data_path, use_absorbance_only, use_personalized_only, target_variable)
@@ -322,23 +351,44 @@ def add_random_jitter(patient_ids, data_path, use_absorbance_only, use_personali
     for patient_id in patient_ids:
         patient_data = data[data['patient ID'] == patient_id].copy()
 
-        # Only apply random jitter to selected columns
-        excluded_columns = [target_variable, 'patient ID', 'collection time', 'MNWCO']
-        jitter_columns = [col for col in data.columns if col not in excluded_columns]
+        fixed_columns = ['NMWCO', 'membrane area', 'target dehydration amount', 
+                        'dialysate ion concentration', 'ultrafiltration coefficient', 
+                        'age', 'systolic pressure', 'duration of dialysis', 
+                        'height', 'dry body weight', '255nm', '280nm', '310nm', 
+                              'venous pressure', 'arterial flow velocity',
+                              'current dehydration volume',
+                              'transmembrane pressure']
 
-        # Add random jitter to each value in the selected columns
-        for column in jitter_columns:
-            jitter = np.random.uniform(-augmentation_params['jitter_level'], augmentation_params['jitter_level'], size=patient_data[column].shape)
-            patient_data[column] += jitter
+        round_off_columns = ['NMWCO', 'target dehydration amount', 
+                             'dialysate ion concentration', 'ultrafiltration coefficient', 
+                             'age', 'systolic pressure']
+
+
+
+        # Generate a single set of random jitter values for each fixed column
+        jitter_values = {
+            col: np.random.uniform(-augmentation_params['jitter_level'], augmentation_params['jitter_level'])
+            for col in fixed_columns
+        }
+
+        # Apply jitter values to fixed columns consistently across all rows
+        for col, jitter in jitter_values.items():
+            patient_data[col] += jitter
+            # Round off to whole values for specified columns
+            if col in round_off_columns:
+                patient_data[col] = np.round(patient_data[col])
+
+            # Ensure non-negative values
+            patient_data[col] = np.clip(patient_data[col], a_min=0.00001, a_max=None)
+
 
         # Generate a new patient ID for the jitter data
-        new_patient_id = 'jitter_' + str(np.random.randint(1e6))  # This generates a random integer between 0 and 1e6
+        new_patient_id = 'jitter_' + str(np.random.randint(1e6))
         patient_data['patient ID'] = new_patient_id
 
         jitter_df = pd.concat([jitter_df, patient_data])
 
     return jitter_df
-
 
 
 
