@@ -13,7 +13,7 @@ from utils.scorer import get_scorer
 from utils.timer import Timer
 from utils.io_utils import save_results_to_file, save_hyperparameters_to_file, save_loss_to_file
 from utils.parser import get_parser, get_given_parameters_parser
-from utils.augmentation import mixup, cutmix, add_gaussian_noise, add_random_jitter
+from utils.augmentation import mixup, cutmix, add_random_jitter_extreme, add_random_jitter
 
 
 
@@ -60,14 +60,14 @@ def dialysis_cross_validation(model, X, y, args, augmentation_params, save_model
           cutmix_df = cutmix(train_patient_ids, args.data_path,  args.use_absorbance_only, args.use_personalized_only, args.target_variable, augmentation_params)
           print('Cutmix df shape: ',cutmix_df.shape)
 
-          noise_df = add_gaussian_noise(train_patient_ids, args.data_path, args.use_absorbance_only, args.use_personalized_only, args.target_variable,  augmentation_params)
-          print('Noise df shape: ',noise_df.shape)
-
           jitter_df = add_random_jitter(train_patient_ids, args.data_path, args.use_absorbance_only, args.use_personalized_only, args.target_variable, augmentation_params)
           print('Jitter df shape: ',jitter_df.shape)
 
-          X_train = pd.concat([X_train, mixup_df.drop([args.target_variable], axis=1), cutmix_df.drop([args.target_variable], axis=1), noise_df.drop([args.target_variable], axis=1), jitter_df.drop([args.target_variable], axis=1)])
-          y_train = pd.concat([y_train, mixup_df[['patient ID', args.target_variable]], cutmix_df[['patient ID', args.target_variable]], noise_df[['patient ID', args.target_variable]], jitter_df[['patient ID', args.target_variable]]])
+          extreme_jitter_df = add_random_jitter_extreme(train_patient_ids, args.data_path, args.use_absorbance_only, args.use_personalized_only, args.target_variable,  augmentation_params)
+          print('Extreme jitter df shape: ',extreme_jitter_df.shape)
+
+          X_train = pd.concat([X_train, mixup_df.drop([args.target_variable], axis=1), cutmix_df.drop([args.target_variable], axis=1), extreme_jitter_df.drop([args.target_variable], axis=1), jitter_df.drop([args.target_variable], axis=1)])
+          y_train = pd.concat([y_train, mixup_df[['patient ID', args.target_variable]], cutmix_df[['patient ID', args.target_variable]], extreme_jitter_df[['patient ID', args.target_variable]], jitter_df[['patient ID', args.target_variable]]])
           print('Augmented Train Set: ', X_train.shape)
           print('Augmented y train Set: ', y_train.shape)
 
@@ -237,7 +237,7 @@ class Objective(object):
           augmentation_params = {
               'mixup_lambda': trial.suggest_categorical("mixup_lambda", [1/6, 2/6, 3/6, 4/6, 5/6]),
               'cutmix_lambda': trial.suggest_categorical("cutmix_lambda", [1/6, 2/6, 3/6, 4/6, 5/6]),
-              'gaussian_noise_level': trial.suggest_float("gaussian_noise_level", 0.001, 0.5),
+              'extreme_factor': trial.suggest_int("extreme_factor", 2, 5),
               'jitter_level': trial.suggest_float("jitter_level", 0.0001, 0.5)
           }
 
@@ -284,7 +284,7 @@ def main(args):
       best_augmentation_params = {
           'mixup_lambda': study.best_trial.params['mixup_lambda'],
           'cutmix_lambda': study.best_trial.params['cutmix_lambda'],
-          'gaussian_noise_level': study.best_trial.params['gaussian_noise_level'],
+          'extreme_factor': study.best_trial.params['extreme_factor'],
           'jitter_level': study.best_trial.params['jitter_level']
       }
     if args.dataset == 'Dialysis':
