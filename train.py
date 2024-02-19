@@ -6,6 +6,8 @@ import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import KFold, StratifiedKFold, train_test_split
 import random 
+import os
+import torch
 
 from models import str2model
 from utils.load_data import load_data
@@ -15,7 +17,15 @@ from utils.io_utils import save_results_to_file, save_hyperparameters_to_file, s
 from utils.parser import get_parser, get_given_parameters_parser
 from utils.augmentation import mixup, cutmix, add_random_jitter_extreme, add_random_jitter
 
-
+def set_seed(seed=None):
+            random.seed(seed)
+            os.environ['PYTHONHASHSEED'] = str(seed)
+            np.random.seed(seed)
+            torch.manual_seed(seed)
+            torch.cuda.manual_seed(seed)
+            torch.cuda.manual_seed_all(seed)
+            torch.backends.cudnn.benchmark = False
+            torch.backends.cudnn.deterministic = True
 
 
 def dialysis_cross_validation(model, X, y, args, augmentation_params, save_model=False):
@@ -260,6 +270,7 @@ class Objective(object):
 
 
 def main(args):
+    set_seed(args.seed)
     print("Start hyperparameter optimization")
     X, y = load_data(args)
 
@@ -294,6 +305,7 @@ def main(args):
 
 
 def main_once(args):
+    set_seed(args.seed)
     print("Train model with given hyperparameters")
     X, y = load_data(args)
 
@@ -313,6 +325,7 @@ def main_once(args):
 if __name__ == "__main__":
     parser = get_parser()
     arguments = parser.parse_args()
+
     print(arguments)
 
     if arguments.optimize_hyperparameters:
